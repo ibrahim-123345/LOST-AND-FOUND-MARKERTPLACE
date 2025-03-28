@@ -28,7 +28,7 @@ const Userschema = new mongoose.Schema({
   role: {
     type: String,
     enum: ["Admin", "User"],
-    default: "Admin"},
+    },
 
 
 
@@ -40,10 +40,10 @@ const Userschema = new mongoose.Schema({
 
 const User = mongoose.model("User", Userschema);
 
-const Createnewuser = async (username, email, password, user) => {
+const Createnewuser = async (username, email, password, role) => {
   try {
     await Dbconnection();
-    const newUser = new User({ username, email, password, user });
+    const newUser = new User({ username, email, password, role });
     await newUser.save();
     console.log("new user created successfully");
   } catch (e) {

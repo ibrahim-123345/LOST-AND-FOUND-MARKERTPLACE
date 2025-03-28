@@ -11,7 +11,7 @@ const lostItem = async (req, res) => {
     await Dbconnection();
     const items = await LostItem.find().limit(4).sort({createdAt:-1});
     res.status(200).json(items); 
-    console.log(items)// Send the list of lost items with image URLs
+    console.log(req.user)// Send the list of lost items with image URLs
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Server Error" });
@@ -25,7 +25,7 @@ const lostItems = async (req, res) => {
     await Dbconnection();
     const items = await LostItem.find();
     res.status(200).json(items); 
-    console.log(items)// Send the list of lost items with image URLs
+    console.log(req.user)// Send the list of lost items with image URLs
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Server Error" });

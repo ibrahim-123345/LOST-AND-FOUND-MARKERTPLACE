@@ -10,7 +10,12 @@ const verfyToken = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, secret);
-    req.user = decoded;
+    req.user = {
+      
+      username: decoded.object.userename, 
+      role: decoded.object.role, 
+    };
+    //console.log(req.user)
  
     next(); 
   } catch (error) {
