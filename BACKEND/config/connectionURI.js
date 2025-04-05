@@ -10,7 +10,7 @@ const Dbconnection = async () => {
 
     const conn = mongoose.connection;
 
-    if (conn.on) console.log("connection exists");
+    if (conn.on) console.log("");
   } catch (e) {
     console.log("error in database connection");
   }

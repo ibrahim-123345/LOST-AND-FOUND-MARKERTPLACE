@@ -10,16 +10,17 @@ const {
   registerController,
   loginController,UserToken,passwordReset,
   deleteUser,userUpdate,
+  userBasedonToken,
 } = require("./controllers/authcontroller");
 const {
-  lostItemController,lostItem,lostItemId,
+  lostItemController,lostItem,lostItemId,itemLostByUser,
   deleteLostItem,lostItems,
   LostItemUpddate,
 } = require("./controllers/lostItem");
 
-//const{matchLostAndFound}=require('./utilities/matchingSystem')
 
-const{foundItemController,
+
+const{foundItemController,itemFoundByUser,
   foundItemUpdate,foundItemLimit,foundItems,singleFound
   ,deleteFound
 }=require('./controllers/founItem')
@@ -41,8 +42,6 @@ const port = process.env.PORT ||7000;
 // Middleware
 app.use(express.json());
 app.use(express.static('public'))
-
-// Serve static files from the "uploads" directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
@@ -56,9 +55,10 @@ app.post("/auth/createUser", registerController);
 
 app.post("/auth/login", checkUser, loginController);
 app.post("/userToken", verfyToken, UserToken);
-app.delete("/user/delete/:id", verfyToken,checkRoles(["Admin","User"]), deleteUser);
+app.delete("/user/delete/:id", verfyToken,checkRoles(["Admin"]), deleteUser);
 app.patch("/user/update/:id", verfyToken,checkRoles(["Admin","User"]), userUpdate);
 app.post("/password/reset", verfyToken,checkRoles(["Admin","User"]) ,passwordReset);
+app.get("/user/getuserBasedonToken",verfyToken,checkRoles(["Admin","User"]),userBasedonToken)
 
 
 
@@ -66,20 +66,23 @@ app.post("/password/reset", verfyToken,checkRoles(["Admin","User"]) ,passwordRes
 app.get("/lostItems",verfyToken,checkRoles(["Admin","User"]),lostItem);//this endpoint have limit
 app.get("/lostItem/:id",verfyToken,checkRoles(["Admin","User"]),lostItemId);//this endpoint to specific based input id
 
-app.get("/lostItem",verfyToken,checkRoles(["Admin","User"]),lostItems);//this endpoint have no limit it displays all losts item reported
+app.get("/lostItem",verfyToken,lostItems);//this endpoint have no limit it displays all losts item reported
 
 app.post("/post/lostItem",verfyToken,checkRoles(["Admin","User"]),upload.single('image') ,lostItemController);
 
 app.delete("/lost/delete/:id",checkRoles(["Admin","User"]), deleteLostItem);
 
 app.patch("/lost/update/:id",checkRoles(["Admin","User"]), LostItemUpddate);
+app.get("/lostItemsByUser/:id",verfyToken,checkRoles(["Admin","User"]),itemLostByUser)
 
 
-//found item crud
+
+
 
 app.post("/foundItems",verfyToken,checkRoles(["Admin","User"]),upload.single('image'), foundItemController);
-app.get("/foundItems",verfyToken,checkRoles(["Admin","User"]), foundItems);
-app.get("/foundItem",checkRoles(["Admin","User"]),foundItemLimit);
+app.get("/foundItems", foundItems);
+app.get("/foundItem",foundItemLimit);
+app.get("/foundItemsByUser/:id",verfyToken,checkRoles(["Admin","User"]),itemFoundByUser)
 
 
 

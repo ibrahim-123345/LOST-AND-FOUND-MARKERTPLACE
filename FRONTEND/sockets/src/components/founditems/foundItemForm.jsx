@@ -25,6 +25,7 @@ const FoundItem = () => {
   };
 
   const handleSubmit = async (e) => {
+    const userid=localStorage.getItem("userid")
     e.preventDefault();
     setLoading(true);
     setError(null);
@@ -36,7 +37,8 @@ const FoundItem = () => {
     formData.append("location", location);
     formData.append("category", category);
     formData.append("contactInfo", contactInfo);
-    formData.append("user","67e2b6c813fe80a3ca4d8fd5")
+    formData.append("user",userid)
+    console.log(userid)
     if (image) formData.append("image", image); // Append image if it exists
 
     try {

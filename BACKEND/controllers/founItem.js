@@ -124,4 +124,27 @@ const foundItemUpdate = async (req, res) => {
   }
 };
 
-module.exports = { foundItemController,foundItems,singleFound,foundItemLimit, deleteFound, foundItemUpdate };
+
+const itemFoundByUser=async(req,res)=>{
+  const { id } = req.params;
+
+  try {
+    await Dbconnection();
+     const item = await FoundItem.findOne({ user: id });
+     res.status(200).json(item);
+
+  
+   
+    
+  } catch (err) {
+    return res.status(500).send("Server error");
+  }
+};
+
+
+
+
+
+
+
+module.exports = { foundItemController,foundItems,singleFound,foundItemLimit, deleteFound, foundItemUpdate ,itemFoundByUser};

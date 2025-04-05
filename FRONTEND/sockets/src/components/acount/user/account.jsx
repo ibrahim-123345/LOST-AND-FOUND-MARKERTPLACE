@@ -1,494 +1,403 @@
 import React, { useState, useEffect } from "react";
 import {
   Container, Card, Button, Table, Tabs, Tab,
-  Row, Col, Image, Form, Modal, Alert, Badge
+  Row, Col, Image, Form, Modal
 } from "react-bootstrap";
 import {
-  FaBox, FaEdit, FaTrash, FaUserCircle,
-  FaImage, FaKey, FaSignOutAlt, FaPlus
+  FaEdit, FaTrash, FaUserCircle,
+  FaKey, FaPlus
 } from "react-icons/fa";
 import "bootstrap/dist/css/bootstrap.min.css";
+import axiosInstance from "../../../axiosInstance";
+import moment from "moment";
+import LostItem from "../../lostitems/lostItemUpload";
+import { Link } from "react-router-dom"
+
+
+
+
 
 const UserDashboard = () => {
-  const [key, setKey] = useState("items");
+  const username = localStorage.getItem("username");
+  const [userProfile, setUserProfile] = useState({
+    name: "",
+    email: "",
+    avatar: "",
+    joinDate: ""
+  });
+
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [showItemModal, setShowItemModal] = useState(false);
-  const [avatarPreview, setAvatarPreview] = useState(null);
-  const [avatarFile, setAvatarFile] = useState(null);
-  const [editingItem, setEditingItem] = useState(null);
-  
-  const [userProfile, setUserProfile] = useState({
-    name: "John Doe",
-    email: "user@example.com",
-    avatar: "",
-    joinDate: "Joined January 2023"
-  });
-  
-  const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
+
+
+
+  const userId = async () => {
+    try {
+      const response = await axiosInstance.get("/user/getuserBasedonToken");
+      const user = response.data;
+      const { message, user: [{ _id }] } = user;
+
+      localStorage.setItem("userid", _id);
+    } catch (error) {
+      console.error("Error fetching user ID:", error);
+    }
+  };
+
+
+
+
+
+
+
+
+
+
+
+
+
   useEffect(() => {
-    // Simulate API loading
-    setTimeout(() => {
-      setItems([
-        { 
-          id: 1, 
-          name: "Vintage Camera", 
-          description: "Excellent condition, barely used", 
-          category: "Electronics",
-          price: 120,
-          status: "Active",
-          date: "2023-05-15"
-        },
-        { 
-          id: 2, 
-          name: "Leather Jacket", 
-          description: "Genuine leather, size M", 
-          category: "Clothing",
-          price: 75,
-          status: "Sold",
-          date: "2023-04-22"
-        }
-      ]);
-      setLoading(false);
-    }, 800);
+    const fetchUserProfile = async () => {
+      try {
+        const response = await axiosInstance.get("/user/getuserBasedonToken");
+        const data = await response.data;
+        const { message, user: [user] } = data;
+        const { username, email, createdAt } = user;
+        setUserProfile({
+          name: username,
+          email: email,
+          avatar: data.avatar || "",
+          joinDate: moment(createdAt).format("MMMM Do YYYY")
+        });
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserProfile(),
+      userId();
   }, []);
 
-  const handleProfileUpdate = (e) => {
-    e.preventDefault();
-    if (avatarFile) {
-      const newAvatarUrl = URL.createObjectURL(avatarFile);
-      setUserProfile({...userProfile, avatar: newAvatarUrl});
-    }
-    setShowProfileModal(false);
-    setAvatarPreview(null);
-    setAvatarFile(null);
+
+
+
+  const [foundItems, setFoundItems] = useState({});
+  const [lostItems, setLostItems] = useState([]);
+  const [key, setKey] = useState("foundItems");
+  const itemBasedOnUser = localStorage.getItem("userid")
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        const foundResponse = await axiosInstance.get(`/foundItemsByUser/${itemBasedOnUser}`);
+       // const lostResponse = await axiosInstance.get(`/lostItemsByUser/${itemBasedOnUser}`);
+
+        const foundDataObj = foundResponse.data.foundItems || {};
+       // const lostDataObj = lostResponse.data.lostItems || {};
+
+        // Convert objects to arrays
+        const foundItemsArray = Object.values(foundDataObj);
+        //const lostItemsArray = Object.values(lostDataObj);
+        //console.log(foundItemsArray, lostItemsArray)
+
+        setFoundItems(foundItemsArray);
+        //setLostItems(lostItemsArray);
+      } catch (error) {
+        console.error("Error fetching items:", error);
+        setFoundItems([]);
+        setLostItems([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchItems();
+  }, [itemBasedOnUser]);
+
+  const handleEditFound = (itemId) => {
+    console.log(`Editing found item: ${itemId}`);
   };
 
-  const handlePasswordChange = (e) => {
-    e.preventDefault();
-    // Add password change logic here
-    setShowPasswordModal(false);
-  };
-
-  const handleAvatarChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setAvatarFile(file);
-      setAvatarPreview(URL.createObjectURL(file));
-    }
-  };
-
-  const removeAvatar = () => {
-    setAvatarPreview(null);
-    setAvatarFile(null);
-    setUserProfile({...userProfile, avatar: ""});
-  };
-
-  const handleSaveItem = (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const itemData = Object.fromEntries(formData.entries());
-    
-    if (editingItem) {
-      // Update existing item
-      setItems(items.map(item => 
-        item.id === editingItem.id ? { ...item, ...itemData } : item
-      ));
-    } else {
-      // Add new item
-      const newItem = {
-        id: items.length + 1,
-        ...itemData,
-        status: "Active",
-        date: new Date().toISOString().split('T')[0]
-      };
-      setItems([...items, newItem]);
-    }
-    
-    setShowItemModal(false);
-    setEditingItem(null);
-  };
-
-  const handleDeleteItem = (id) => {
-    if (window.confirm("Are you sure you want to delete this item?")) {
-      setItems(items.filter(item => item.id !== id));
+  const handleDeleteFound = async (itemId) => {
+    if (window.confirm("Are you sure you want to delete this found item?")) {
+      try {
+        await axiosInstance.delete(`/found/delete/${itemId}`);
+        setFoundItems(foundItems.filter(item => item._id !== itemId));
+      } catch (error) {
+        console.error("Error deleting found item:", error);
+      }
     }
   };
 
-  const handleEditItem = (item) => {
-    setEditingItem(item);
-    setShowItemModal(true);
+  const handleEditLost = (itemId) => {
+    console.log(`Editing lost item: ${itemId}`);
   };
 
-  const renderEmptyState = (message, action) => (
-    <Card className="border-0 shadow-sm">
-      <Card.Body className="text-center py-5">
-        <p className="text-muted mb-3">{message}</p>
-        {action && (
-          <Button variant="primary" onClick={() => setShowItemModal(true)}>
+  const handleDeleteLost = async (itemId) => {
+    if (window.confirm("Are you sure you want to delete this lost item?")) {
+      try {
+        await axiosInstance.delete(`/lost/delete/${itemId}`);
+        setLostItems(lostItems.filter(item => item._id !== itemId));
+      } catch (error) {
+        console.error("Error deleting lost item:", error);
+      }
+    }
+  };
+
+ const renderEmptyState = (message, action, linkTo) => (
+  <Card className="border-0 shadow-sm">
+    <Card.Body className="text-center py-5">
+      <p className="text-muted mb-3">{message}</p>
+      {action && (
+        <Link to="/lost-itemsPost">
+          <Button variant="primary">
             <FaPlus className="me-1" /> {action}
           </Button>
-        )}
-      </Card.Body>
-    </Card>
+        </Link>
+      )}
+    </Card.Body>
+  </Card>
+);
+
+
+  const renderFoundItemsTable = () => (
+    <Table responsive bordered hover>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Image</th>
+          <th>Item</th>
+          <th>Description</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {foundItems.map((item, index) => (
+          <tr key={item._id}>
+            <td>{index + 1}</td>
+            <td>
+              {item.image ? (
+                <Image src={item.image} width={80} height={80} className="rounded" />
+              ) : (
+                <FaUserCircle size={50} className="text-muted" />
+              )}
+            </td>
+            <td>{item.name}</td>
+            <td>{item.description}</td>
+            <td>{moment(item.dateFound).format("MMMM Do YYYY")}</td>
+            <td>{item.status}</td>
+            <td>
+              <Button
+                variant="outline-success"
+                size="sm"
+                className="me-2"
+                onClick={() => handleEditFound(item._id)}
+              >
+                <FaEdit />
+              </Button>
+              <Button
+                variant="outline-danger"
+                size="sm"
+                onClick={() => handleDeleteFound(item._id)}
+              >
+                <FaTrash />
+              </Button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </Table>
   );
+
+  const renderLostItemsTable = () => (
+    <Table responsive bordered hover>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Image</th>
+          <th>Item</th>
+          <th>Description</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {lostItems.map((item, index) => (
+          <tr key={item._id}>
+            <td>{index + 1}</td>
+            <td>
+              {item.image ? (
+                <Image src={item.image} width={80} height={80} className="rounded" />
+              ) : (
+                <FaUserCircle size={50} className="text-muted" />
+              )}
+            </td>
+            <td>{item.name}</td>
+            <td>{item.description}</td>
+            <td>{moment(item.dateLost).format("MMMM Do YYYY")}</td>
+            <td>{item.status}</td>
+            <td>
+              <Button
+                variant="outline-success"
+                size="sm"
+                className="me-2"
+                onClick={() => handleEditLost(item._id)}
+              >
+                <FaEdit />
+              </Button>
+              <Button
+                variant="outline-danger"
+                size="sm"
+                onClick={() => handleDeleteLost(item._id)}
+              >
+                <FaTrash />
+              </Button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </Table>
+  );
+
+  const handleProfileSave = () => {
+    setShowProfileModal(false);
+  };
+
+  const handlePasswordSave = async () => {
+    const oldPassword = document.getElementById("oldPassword").value;
+    const newPassword = document.getElementById("newPassword").value;
+    const confirmPassword = document.getElementById("confirmPassword").value;
+
+
+    if (newPassword !== confirmPassword) {
+      alert("Passwords do not match.");
+      return;
+    }
+
+    try {
+      await axiosInstance.post("/password/reset", { username, oldPassword, newPassword });
+      alert("Password has been reset successfully.");
+      setShowPasswordModal(false);
+    } catch (error) {
+      console.error("Error resetting password:", error);
+      alert("There was an error resetting your password.");
+    }
+  };
 
   return (
     <Container className="py-4">
-      {/* User Profile Section */}
-      <Card className="mb-4 border-0 shadow-sm">
-        <Card.Body className="p-4">
+      {/* Profile Section */}
+      <Card className="mb-4 shadow-sm">
+        <Card.Body>
           <Row className="align-items-center">
-            <Col md={2} className="text-center mb-3 mb-md-0">
+            <Col xs="auto">
               {userProfile.avatar ? (
-                <Image 
-                  src={userProfile.avatar} 
-                  roundedCircle 
-                  width={100} 
-                  height={100} 
-                  className="border object-fit-cover"
-                  alt="User avatar"
-                />
+                <Image src={userProfile.avatar} roundedCircle width={80} height={80} />
               ) : (
-                <div className="d-flex justify-content-center align-items-center bg-light rounded-circle" 
-                  style={{width: 100, height: 100}}>
-                  <FaUserCircle size={60} className="text-secondary" />
-                </div>
+                <FaUserCircle size={80} className="text-muted" />
               )}
             </Col>
-            <Col md={6} className="mb-3 mb-md-0">
-              <h3 className="mb-2">{userProfile.name}</h3>
-              <p className="text-muted mb-1">
-                <strong>Email:</strong> {userProfile.email}
-              </p>
-              <p className="text-muted">
-                {userProfile.joinDate}
-              </p>
+            <Col>
+              <h5>{userProfile.name}</h5>
+              <p className="mb-0 text-muted">{userProfile.email}</p>
+              <small>Joined At: {userProfile.joinDate}</small>
             </Col>
-            <Col md={4} className="d-flex flex-column flex-md-row justify-content-md-end gap-2">
-              <Button 
-                variant="outline-primary" 
-                className="text-nowrap"
-                onClick={() => setShowProfileModal(true)}
-              >
+            <Col xs="auto">
+              <Button variant="outline-primary" className="me-2" onClick={() => setShowProfileModal(true)}>
                 <FaEdit className="me-1" /> Edit Profile
               </Button>
-              <Button 
-                variant="outline-secondary" 
-                className="text-nowrap"
-                onClick={() => setShowPasswordModal(true)}
-              >
+              <Button variant="outline-secondary" onClick={() => setShowPasswordModal(true)}>
                 <FaKey className="me-1" /> Change Password
-              </Button>
-              <Button variant="outline-danger" className="text-nowrap">
-                <FaSignOutAlt className="me-1" /> Logout
               </Button>
             </Col>
           </Row>
         </Card.Body>
       </Card>
 
-      {/* Dashboard Tabs */}
-      <h2 className="mb-3">My Dashboard</h2>
-      <Tabs activeKey={key} onSelect={(k) => setKey(k)} className="mb-3">
-        <Tab eventKey="items" title="My Items">
-          {loading ? (
-            <div className="text-center py-5">Loading your items...</div>
-          ) : items.length > 0 ? (
-            <Card className="border-0 shadow-sm">
-              <Card.Body>
-                <div className="d-flex justify-content-end mb-3">
-                  <Button variant="primary" onClick={() => {
-                    setEditingItem(null);
-                    setShowItemModal(true);
-                  }}>
-                    <FaPlus className="me-1" /> Add Item
-                  </Button>
-                </div>
-                <Table striped bordered hover responsive>
-                  <thead>
-                    <tr>
-                      <th>Item</th>
-                      <th>Description</th>
-                      <th>Category</th>
-                      <th>Price</th>
-                      <th>Status</th>
-                      <th>Date</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {items.map((item) => (
-                      <tr key={item.id}>
-                        <td>{item.name}</td>
-                        <td className="text-truncate" style={{maxWidth: '200px'}}>{item.description}</td>
-                        <td>{item.category}</td>
-                        <td>${item.price}</td>
-                        <td>
-                          <Badge bg={item.status === 'Active' ? 'success' : 'secondary'}>
-                            {item.status}
-                          </Badge>
-                        </td>
-                        <td>{item.date}</td>
-                        <td>
-                          <Button 
-                            variant="outline-primary" 
-                            size="sm" 
-                            className="me-2"
-                            onClick={() => handleEditItem(item)}
-                          >
-                            <FaEdit />
-                          </Button>
-                          <Button 
-                            variant="outline-danger" 
-                            size="sm"
-                            onClick={() => handleDeleteItem(item.id)}
-                          >
-                            <FaTrash />
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              </Card.Body>
-            </Card>
-          ) : (
-            renderEmptyState("You haven't listed any items yet.", "Add Your First Item")
-          )}
-        </Tab>
-      </Tabs>
-
-      {/* Edit Profile Modal */}
-      <Modal show={showProfileModal} onHide={() => {
-        setShowProfileModal(false);
-        setAvatarPreview(null);
-        setAvatarFile(null);
-      }}>
+      {/* Profile Modal */}
+      <Modal show={showProfileModal} onHide={() => setShowProfileModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Edit Profile</Modal.Title>
         </Modal.Header>
-        <Form onSubmit={handleProfileUpdate}>
-          <Modal.Body>
-            <Form.Group className="mb-4 text-center">
-              <div className="position-relative d-inline-block">
-                {avatarPreview || userProfile.avatar ? (
-                  <>
-                    <Image 
-                      src={avatarPreview || userProfile.avatar} 
-                      roundedCircle 
-                      width={120} 
-                      height={120} 
-                      className="border object-fit-cover mb-2"
-                      alt="Avatar preview"
-                    />
-                    <Button 
-                      variant="danger" 
-                      size="sm" 
-                      className="position-absolute top-0 end-0 rounded-circle"
-                      onClick={removeAvatar}
-                    >
-                      <FaTrash size={12} />
-                    </Button>
-                  </>
-                ) : (
-                  <div className="d-flex justify-content-center align-items-center bg-light rounded-circle mb-2" 
-                    style={{width: 120, height: 120}}>
-                    <FaUserCircle size={60} className="text-secondary" />
-                  </div>
-                )}
-                <div>
-                  <Form.Label 
-                    htmlFor="avatarUpload" 
-                    className="btn btn-sm btn-outline-primary mt-2"
-                  >
-                    <FaImage className="me-1" /> {avatarPreview ? "Change" : "Upload"} Avatar
-                  </Form.Label>
-                  <Form.Control 
-                    type="file" 
-                    id="avatarUpload" 
-                    accept="image/*" 
-                    className="d-none"
-                    onChange={handleAvatarChange}
-                  />
-                </div>
-              </div>
+        <Modal.Body>
+          <Form>
+            <Form.Group controlId="username">
+              <Form.Label>Username</Form.Label>
+              <Form.Control type="text" defaultValue={userProfile.name} />
             </Form.Group>
-            
-            <Form.Group className="mb-3">
-              <Form.Label>Name</Form.Label>
-              <Form.Control 
-                type="text" 
-                name="name"
-                value={userProfile.name}
-                onChange={(e) => setUserProfile({...userProfile, name: e.target.value})}
-                required
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
+            <Form.Group controlId="email">
               <Form.Label>Email</Form.Label>
-              <Form.Control 
-                type="email" 
-                name="email"
-                value={userProfile.email}
-                onChange={(e) => setUserProfile({...userProfile, email: e.target.value})}
-                required
-              />
+              <Form.Control type="email" defaultValue={userProfile.email} />
             </Form.Group>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="outline-secondary" onClick={() => {
-              setShowProfileModal(false);
-              setAvatarPreview(null);
-              setAvatarFile(null);
-            }}>
-              Cancel
-            </Button>
-            <Button variant="primary" type="submit">
-              Save Changes
-            </Button>
-          </Modal.Footer>
-        </Form>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowProfileModal(false)}>
+            Close
+          </Button>
+          <Button variant="primary" onClick={handleProfileSave}>
+            Save Changes
+          </Button>
+        </Modal.Footer>
       </Modal>
 
-      {/* Add/Edit Item Modal */}
-      <Modal show={showItemModal} onHide={() => {
-        setShowItemModal(false);
-        setEditingItem(null);
-      }} size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>{editingItem ? "Edit Item" : "Add New Item"}</Modal.Title>
-        </Modal.Header>
-        <Form onSubmit={handleSaveItem}>
-          <Modal.Body>
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Item Name</Form.Label>
-                  <Form.Control 
-                    type="text" 
-                    name="name"
-                    defaultValue={editingItem?.name || ""}
-                    required
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Category</Form.Label>
-                  <Form.Select name="category" defaultValue={editingItem?.category || ""} required>
-                    <option value="">Select category</option>
-                    <option value="Electronics">Electronics</option>
-                    <option value="Clothing">Clothing</option>
-                    <option value="Furniture">Furniture</option>
-                    <option value="Books">Books</option>
-                    <option value="Other">Other</option>
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-            </Row>
-            
-            <Form.Group className="mb-3">
-              <Form.Label>Description</Form.Label>
-              <Form.Control 
-                as="textarea" 
-                rows={3} 
-                name="description"
-                defaultValue={editingItem?.description || ""}
-                required
-              />
-            </Form.Group>
-            
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Price ($)</Form.Label>
-                  <Form.Control 
-                    type="number" 
-                    name="price"
-                    min="0"
-                    step="0.01"
-                    defaultValue={editingItem?.price || ""}
-                    required
-                  />
-                </Form.Group>
-              </Col>
-              {editingItem && (
-                <Col md={6}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Status</Form.Label>
-                    <Form.Select name="status" defaultValue={editingItem?.status || "Active"}>
-                      <option value="Active">Active</option>
-                      <option value="Sold">Sold</option>
-                      <option value="Pending">Pending</option>
-                    </Form.Select>
-                  </Form.Group>
-                </Col>
-              )}
-            </Row>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="outline-secondary" onClick={() => {
-              setShowItemModal(false);
-              setEditingItem(null);
-            }}>
-              Cancel
-            </Button>
-            <Button variant="primary" type="submit">
-              {editingItem ? "Update Item" : "Add Item"}
-            </Button>
-          </Modal.Footer>
-        </Form>
-      </Modal>
-
-      {/* Change Password Modal */}
+      {/* Password Reset Modal */}
       <Modal show={showPasswordModal} onHide={() => setShowPasswordModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Change Password</Modal.Title>
+          <Modal.Title>Reset Password</Modal.Title>
         </Modal.Header>
-        <Form onSubmit={handlePasswordChange}>
-          <Modal.Body>
-            <Form.Group className="mb-3">
-              <Form.Label>Current Password</Form.Label>
-              <Form.Control 
-                type="password" 
-                placeholder="Enter current password" 
-                required
-              />
+        <Modal.Body>
+          <Form>
+            <Form.Group controlId="oldPassword">
+              <Form.Label>Old Password</Form.Label>
+              <Form.Control type="password" placeholder="Enter old password" />
             </Form.Group>
-            <Form.Group className="mb-3">
+            <Form.Group controlId="newPassword">
               <Form.Label>New Password</Form.Label>
-              <Form.Control 
-                type="password" 
-                placeholder="Enter new password" 
-                minLength="8"
-                required
-              />
-              <Form.Text className="text-muted">
-                Password must be at least 8 characters long
-              </Form.Text>
+              <Form.Control type="password" placeholder="Enter new password" />
             </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Confirm New Password</Form.Label>
-              <Form.Control 
-                type="password" 
-                placeholder="Confirm new password" 
-                required
-              />
+            <Form.Group controlId="confirmPassword">
+              <Form.Label>Confirm Password</Form.Label>
+              <Form.Control type="password" placeholder="Confirm new password" />
             </Form.Group>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="outline-secondary" onClick={() => setShowPasswordModal(false)}>
-              Cancel
-            </Button>
-            <Button variant="primary" type="submit">
-              Update Password
-            </Button>
-          </Modal.Footer>
-        </Form>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowPasswordModal(false)}>
+            Close
+          </Button>
+          <Button variant="primary" onClick={handlePasswordSave}>
+            Reset Password
+          </Button>
+        </Modal.Footer>
       </Modal>
+
+      {/* Lost and Found Items */}
+      <Tabs activeKey={key} onSelect={(k) => setKey(k)} id="user-dashboard-tabs">
+        <Tab eventKey="foundItems" title="Found Items">
+          {loading ? (
+            <p>Loading...</p>
+          ) : foundItems.length === 0 ? (
+            renderEmptyState("Seems like you're not lucky yet", "Add Item You've Found")
+          ) : (
+            renderFoundItemsTable()
+          )}
+        </Tab>
+        <Tab eventKey="lostItems" title="Lost Items">
+          {loading ? (
+            <p>Loading...</p>
+          ) : lostItems.length === 0 ? (
+            renderEmptyState("Seems like you've never lost anything", "Want to Add Item?")
+          ) : (
+            renderLostItemsTable()
+          )}
+        </Tab>
+      </Tabs>
     </Container>
   );
 };

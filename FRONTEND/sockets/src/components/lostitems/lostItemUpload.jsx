@@ -17,6 +17,7 @@ const LostItem = () => {
   const [error, setError] = useState(null);
 
   const handleImageChange = (e) => {
+    const user=localStorage.getItem("userid")
     setImage(e.target.files[0]); // Get the first image from the file input
   };
 
@@ -32,7 +33,7 @@ const LostItem = () => {
     formData.append("location", location);
     formData.append("category", category);
     formData.append("contactInfo", contactInfo);
-    formData.append("user","67e2b6c813fe80a3ca4d8fd5")
+    formData.append("user",user)
     if (image) formData.append("image", image);
 
     try {

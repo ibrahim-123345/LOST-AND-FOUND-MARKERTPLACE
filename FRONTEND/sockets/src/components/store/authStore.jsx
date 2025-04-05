@@ -1,10 +1,14 @@
 import { create } from "zustand";
+import axiosInstance from "../../axiosInstance";
+;
+
 
 const useAuthStore = create((set) => ({
  
   token: localStorage.getItem("token") || null,
   username: localStorage.getItem("username") || null,
   role: localStorage.getItem("role") || null,
+  userid: localStorage.getItem("userid") || null,
 
   setToken: (newToken) => {
     localStorage.setItem("token", newToken);
@@ -21,6 +25,11 @@ const useAuthStore = create((set) => ({
     set({ role: newRole });
   },
 
+  setUserId: (newUserId) => {
+    localStorage.setItem("userid", newUserId);
+    set({ userid: newUserId });
+  },
+
   clearToken: () => {
     localStorage.removeItem("token");  
     set({ token: null });
@@ -30,7 +39,8 @@ const useAuthStore = create((set) => ({
     localStorage.removeItem("token");
     localStorage.removeItem("username");
     localStorage.removeItem("role");
-    set({ token: null, username: null, role: null });
+    localStorage.removeItem("userid"); // Clear userid
+    set({ token: null, username: null, role: null, userid: null }); // Reset userid
   },
 }));
 

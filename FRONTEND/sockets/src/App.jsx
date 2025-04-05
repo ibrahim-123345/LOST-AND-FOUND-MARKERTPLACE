@@ -16,6 +16,7 @@ import FoundItemDetails from "./components/founditems/founditemDisplayD";
 import Logout from "./components/login/logout";
 import AdminDashboard from './components/acount/admin/admin dashboard';
 import UserDashboard from './components/acount/user/account';
+import LostAndFoundDashboard from './components/acount/user/account';
 
 // Function to check if a user is authenticated
 const isAuthenticated = () => {
@@ -41,7 +42,7 @@ const App = () => {
         <Route path="/login" element={<LoginRedirect />} />
 
         {/* Protected Routes (Require Authentication) */}
-        <Route path="/lost-items" element={<ProtectedRoute element={<LostItem />} />} />
+        <Route path="/lost-itemsPost" element={<ProtectedRoute element={<LostItem />} />} />
         <Route path="/foundItems" element={<ProtectedRoute element={<FoundItemsPage />} />} />
         <Route path="/foundItemReport" element={<ProtectedRoute element={<FoundItem />} />} />
         <Route path="/lostitems" element={<ProtectedRoute element={<LostItemsPage />} />} />

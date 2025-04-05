@@ -37,14 +37,14 @@ const lostItemController = async (req, res) => {
   try {
     await Dbconnection(); // Ensure DB is connected
 
-    const { name, description, dateLost, location, contactInfo ,user} = req.body;
+    const { name, description, date, location, contactInfo ,user} = req.body;
     const image = req.file ? `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}` : null; // Full image URL
 
     // Create lost item entry
     const newItem = await createLostItem(
       name,
       description,
-      dateLost,
+      date,
       location,
       contactInfo,
       image
@@ -118,4 +118,24 @@ const LostItemUpddate = async (req, res) => {
   }
 };
 
-module.exports = { lostItemController, lostItemId,lostItem,lostItems, deleteLostItem, LostItemUpddate };
+
+
+const itemLostByUser=async(req,res)=>{
+  const { id } = req.params;
+
+  try {
+    await Dbconnection();
+     const item = await LostItem.findOne({ user: id });
+     res.status(200).json(item);
+
+  
+   
+    
+  } catch (err) {
+    return res.status(500).send("Server error");
+  }
+};
+
+
+
+module.exports = { lostItemController, lostItemId,lostItem,lostItems, deleteLostItem, LostItemUpddate,itemLostByUser };
