@@ -17,11 +17,12 @@ const LostItem = () => {
   const [error, setError] = useState(null);
 
   const handleImageChange = (e) => {
-    const user=localStorage.getItem("userid")
+    
     setImage(e.target.files[0]); // Get the first image from the file input
   };
 
   const handleSubmit = async (e) => {
+    const user=localStorage.getItem("userid")
     e.preventDefault();
     setLoading(true);
     setError(null);

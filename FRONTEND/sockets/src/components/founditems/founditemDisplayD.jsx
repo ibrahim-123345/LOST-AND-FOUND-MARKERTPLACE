@@ -68,7 +68,7 @@ const FoundItemDetails = () => {
           }}
         />
         <h2 style={{ fontWeight: "bold" }}>{item.name}</h2>
-        <p>{moment(item.dateFound).fromNow() + " ago" || "Unknown Date"}</p>
+        <p>{moment(item.dateFound).fromNow() + " Unknown Date"}</p>
         <hr />
         <p style={{ fontSize: "1.1rem" }}>
           <strong>Description:</strong> {item.description}

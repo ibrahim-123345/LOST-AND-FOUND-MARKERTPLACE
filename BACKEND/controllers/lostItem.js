@@ -125,7 +125,7 @@ const itemLostByUser=async(req,res)=>{
 
   try {
     await Dbconnection();
-     const item = await LostItem.findOne({ user: id });
+     const item = await LostItem.find({ user: id });
      res.status(200).json(item);
 
   

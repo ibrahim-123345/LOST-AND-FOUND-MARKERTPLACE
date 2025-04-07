@@ -10,12 +10,7 @@ import {
 import "bootstrap/dist/css/bootstrap.min.css";
 import axiosInstance from "../../../axiosInstance";
 import moment from "moment";
-import LostItem from "../../lostitems/lostItemUpload";
-import { Link } from "react-router-dom"
-
-
-
-
+import { Link } from "react-router-dom";
 
 const UserDashboard = () => {
   const username = localStorage.getItem("username");
@@ -30,39 +25,23 @@ const UserDashboard = () => {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [loading, setLoading] = useState(true);
 
-
-
-
   const userId = async () => {
     try {
       const response = await axiosInstance.get("/user/getuserBasedonToken");
       const user = response.data;
-      const { message, user: [{ _id }] } = user;
-
+      const { user: [{ _id }] } = user;
       localStorage.setItem("userid", _id);
     } catch (error) {
       console.error("Error fetching user ID:", error);
     }
   };
 
-
-
-
-
-
-
-
-
-
-
-
-
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
         const response = await axiosInstance.get("/user/getuserBasedonToken");
         const data = await response.data;
-        const { message, user: [user] } = data;
+        const { user: [user] } = data;
         const { username, email, createdAt } = user;
         setUserProfile({
           name: username,
@@ -77,33 +56,23 @@ const UserDashboard = () => {
       }
     };
 
-    fetchUserProfile(),
-      userId();
+    fetchUserProfile();
+    userId();
   }, []);
 
-
-
-
-  const [foundItems, setFoundItems] = useState({});
+  const [foundItems, setFoundItems] = useState([]);
   const [lostItems, setLostItems] = useState([]);
   const [key, setKey] = useState("foundItems");
-  const itemBasedOnUser = localStorage.getItem("userid")
+  const itemBasedOnUser = localStorage.getItem("userid");
+
   useEffect(() => {
     const fetchItems = async () => {
       try {
         const foundResponse = await axiosInstance.get(`/foundItemsByUser/${itemBasedOnUser}`);
-       // const lostResponse = await axiosInstance.get(`/lostItemsByUser/${itemBasedOnUser}`);
-
-        const foundDataObj = foundResponse.data.foundItems || {};
-       // const lostDataObj = lostResponse.data.lostItems || {};
-
-        // Convert objects to arrays
-        const foundItemsArray = Object.values(foundDataObj);
-        //const lostItemsArray = Object.values(lostDataObj);
-        //console.log(foundItemsArray, lostItemsArray)
-
-        setFoundItems(foundItemsArray);
-        //setLostItems(lostItemsArray);
+        const foundData = foundResponse.data || {};
+        setFoundItems(foundData);
+        console.log(foundData);
+        const lostResponse = await axiosInstance.get(`/lostItemsByUser/${itemBasedOnUser}`);
       } catch (error) {
         console.error("Error fetching items:", error);
         setFoundItems([]);
@@ -116,9 +85,7 @@ const UserDashboard = () => {
     fetchItems();
   }, [itemBasedOnUser]);
 
-  const handleEditFound = (itemId) => {
-    console.log(`Editing found item: ${itemId}`);
-  };
+  const handleEditFound = (itemId) => console.log(`Editing found item: ${itemId}`);
 
   const handleDeleteFound = async (itemId) => {
     if (window.confirm("Are you sure you want to delete this found item?")) {
@@ -131,9 +98,7 @@ const UserDashboard = () => {
     }
   };
 
-  const handleEditLost = (itemId) => {
-    console.log(`Editing lost item: ${itemId}`);
-  };
+  const handleEditLost = (itemId) => console.log(`Editing lost item: ${itemId}`);
 
   const handleDeleteLost = async (itemId) => {
     if (window.confirm("Are you sure you want to delete this lost item?")) {
@@ -146,25 +111,26 @@ const UserDashboard = () => {
     }
   };
 
- const renderEmptyState = (message, action, linkTo) => (
-  <Card className="border-0 shadow-sm">
-    <Card.Body className="text-center py-5">
-      <p className="text-muted mb-3">{message}</p>
-      {action && (
-        <Link to="/lost-itemsPost">
-          <Button variant="primary">
-            <FaPlus className="me-1" /> {action}
-          </Button>
-        </Link>
-      )}
-    </Card.Body>
-  </Card>
-);
+  const renderEmptyState = (message, action, linkTo) => (
+    <Card className="text-center border-0 shadow-sm bg-light">
+      <Card.Body className="py-5">
+        <p className="text-muted fs-5 mb-4">{message}</p>
+        {action && (
+          <Link to={linkTo}>
+            <Button variant="primary" className="px-4 py-2">
+              <FaPlus className="me-2" /> {action}
+            </Button>
+          </Link>
+        )}
+      </Card.Body>
+    </Card>
+  );
 
-
+ 
+  
   const renderFoundItemsTable = () => (
-    <Table responsive bordered hover>
-      <thead>
+    <Table responsive bordered hover className="bg-white shadow-sm">
+      <thead className="table-primary">
         <tr>
           <th>#</th>
           <th>Image</th>
@@ -212,87 +178,10 @@ const UserDashboard = () => {
       </tbody>
     </Table>
   );
-
-  const renderLostItemsTable = () => (
-    <Table responsive bordered hover>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Image</th>
-          <th>Item</th>
-          <th>Description</th>
-          <th>Date</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {lostItems.map((item, index) => (
-          <tr key={item._id}>
-            <td>{index + 1}</td>
-            <td>
-              {item.image ? (
-                <Image src={item.image} width={80} height={80} className="rounded" />
-              ) : (
-                <FaUserCircle size={50} className="text-muted" />
-              )}
-            </td>
-            <td>{item.name}</td>
-            <td>{item.description}</td>
-            <td>{moment(item.dateLost).format("MMMM Do YYYY")}</td>
-            <td>{item.status}</td>
-            <td>
-              <Button
-                variant="outline-success"
-                size="sm"
-                className="me-2"
-                onClick={() => handleEditLost(item._id)}
-              >
-                <FaEdit />
-              </Button>
-              <Button
-                variant="outline-danger"
-                size="sm"
-                onClick={() => handleDeleteLost(item._id)}
-              >
-                <FaTrash />
-              </Button>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </Table>
-  );
-
-  const handleProfileSave = () => {
-    setShowProfileModal(false);
-  };
-
-  const handlePasswordSave = async () => {
-    const oldPassword = document.getElementById("oldPassword").value;
-    const newPassword = document.getElementById("newPassword").value;
-    const confirmPassword = document.getElementById("confirmPassword").value;
-
-
-    if (newPassword !== confirmPassword) {
-      alert("Passwords do not match.");
-      return;
-    }
-
-    try {
-      await axiosInstance.post("/password/reset", { username, oldPassword, newPassword });
-      alert("Password has been reset successfully.");
-      setShowPasswordModal(false);
-    } catch (error) {
-      console.error("Error resetting password:", error);
-      alert("There was an error resetting your password.");
-    }
-  };
-
+  
   return (
     <Container className="py-4">
-      {/* Profile Section */}
-      <Card className="mb-4 shadow-sm">
+      <Card className="mb-4 shadow-sm bg-white">
         <Card.Body>
           <Row className="align-items-center">
             <Col xs="auto">
@@ -303,9 +192,9 @@ const UserDashboard = () => {
               )}
             </Col>
             <Col>
-              <h5>{userProfile.name}</h5>
+              <h5 className="mb-1 fw-bold">{userProfile.name}</h5>
               <p className="mb-0 text-muted">{userProfile.email}</p>
-              <small>Joined At: {userProfile.joinDate}</small>
+              <small className="text-muted">Joined At: {userProfile.joinDate}</small>
             </Col>
             <Col xs="auto">
               <Button variant="outline-primary" className="me-2" onClick={() => setShowProfileModal(true)}>
@@ -319,80 +208,21 @@ const UserDashboard = () => {
         </Card.Body>
       </Card>
 
-      {/* Profile Modal */}
-      <Modal show={showProfileModal} onHide={() => setShowProfileModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Edit Profile</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form>
-            <Form.Group controlId="username">
-              <Form.Label>Username</Form.Label>
-              <Form.Control type="text" defaultValue={userProfile.name} />
-            </Form.Group>
-            <Form.Group controlId="email">
-              <Form.Label>Email</Form.Label>
-              <Form.Control type="email" defaultValue={userProfile.email} />
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowProfileModal(false)}>
-            Close
-          </Button>
-          <Button variant="primary" onClick={handleProfileSave}>
-            Save Changes
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-      {/* Password Reset Modal */}
-      <Modal show={showPasswordModal} onHide={() => setShowPasswordModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Reset Password</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form>
-            <Form.Group controlId="oldPassword">
-              <Form.Label>Old Password</Form.Label>
-              <Form.Control type="password" placeholder="Enter old password" />
-            </Form.Group>
-            <Form.Group controlId="newPassword">
-              <Form.Label>New Password</Form.Label>
-              <Form.Control type="password" placeholder="Enter new password" />
-            </Form.Group>
-            <Form.Group controlId="confirmPassword">
-              <Form.Label>Confirm Password</Form.Label>
-              <Form.Control type="password" placeholder="Confirm new password" />
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowPasswordModal(false)}>
-            Close
-          </Button>
-          <Button variant="primary" onClick={handlePasswordSave}>
-            Reset Password
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-      {/* Lost and Found Items */}
-      <Tabs activeKey={key} onSelect={(k) => setKey(k)} id="user-dashboard-tabs">
+      <Tabs activeKey={key} onSelect={(k) => setKey(k)} id="user-dashboard-tabs" className="mb-3">
         <Tab eventKey="foundItems" title="Found Items">
           {loading ? (
-            <p>Loading...</p>
-          ) : foundItems.length === 0 ? (
-            renderEmptyState("Seems like you're not lucky yet", "Add Item You've Found")
+            <p className="text-center py-4">Loading...</p>
+          ) : !foundItems._id ? (
+            renderEmptyState("Seems like you're not lucky yet", "Add Item You've Found", "/found-itemsPost")
           ) : (
             renderFoundItemsTable()
           )}
         </Tab>
         <Tab eventKey="lostItems" title="Lost Items">
           {loading ? (
-            <p>Loading...</p>
+            <p className="text-center py-4">Loading...</p>
           ) : lostItems.length === 0 ? (
-            renderEmptyState("Seems like you've never lost anything", "Want to Add Item?")
+            renderEmptyState("Seems like you've never lost anything", "Want to Add Item?", "/foundItemReport")
           ) : (
             renderLostItemsTable()
           )}

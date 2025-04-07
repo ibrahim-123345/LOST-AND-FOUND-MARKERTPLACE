@@ -114,8 +114,8 @@ const HomePage = () => {
                   <Card.Img variant="top" src={item.image || "https://via.placeholder.com/150"} alt="removed" style={{ height: "200px", objectFit: "cover" }} />
                   <Card.Body>
                     <Card.Title>{item.name}</Card.Title>
-                    <Card.Text>Found at {item.location} on {moment(item.dateLost).fromNow()} ago.</Card.Text>
-                    <Button variant="primary" onClick={() => handleViewDetails(item)}>See More Details</Button>
+                    <Card.Text>Found at {item.location} on {moment(item.dateLost).fromNow()}.</Card.Text>
+                    <Button variant="primary" onClick={() => handleViewDetails(item)}>See More Details...</Button>
                   </Card.Body>
                 </Card>
               </Col>

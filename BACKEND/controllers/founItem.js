@@ -130,7 +130,7 @@ const itemFoundByUser=async(req,res)=>{
 
   try {
     await Dbconnection();
-     const item = await FoundItem.findOne({ user: id });
+     const item = await FoundItem.find({ user: id });
      res.status(200).json(item);
 
   
