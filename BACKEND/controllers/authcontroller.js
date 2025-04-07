@@ -121,13 +121,13 @@ const UserToken = async (req, res) => {
 const userUpdate = async (req, res) => {
 
   const { id } = req.params;
-  const { username, email, password } = req.body;
+  const { idP,username, email, password,role } = req.body;
 
 
   try {
     await Dbconnection();
     const hashedPassword = await bcrypt.hash(password, 10)
-    const update = await User.findOneAndUpdate({ _id: id }, { username, email, password: hashedPassword }, {
+    const update = await User.findOneAndUpdate({ _id: id }, { idP,username, email, password: hashedPassword ,role}, {
       new: true,
     });
 
@@ -200,7 +200,7 @@ const userBasedonToken = async (req, res) => {
       
     }
 
-    res.status(200).json({ message: "User found", user }); 
+    res.status(200).json({ user }); 
   } catch (err) {
     console.error(err); 
     
@@ -219,4 +219,19 @@ const userBasedonToken = async (req, res) => {
   }
 };
 
-module.exports = { registerController, loginController, UserToken, deleteUser, userUpdate, passwordReset,userBasedonToken };
+
+
+const FindRegisteredUsers=async(req,res)=>{
+
+  try {
+    await Dbconnection();
+    const usersRegistered = await User.find();
+    res.status(200).json(usersRegistered); 
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server Error" });
+  }
+
+}
+
+module.exports = { registerController, loginController, UserToken,FindRegisteredUsers, deleteUser, userUpdate, passwordReset,userBasedonToken };

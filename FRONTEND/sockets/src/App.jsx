@@ -23,9 +23,17 @@ const isAuthenticated = () => {
   return localStorage.getItem("token") !== null;
 };
 
-// Protected Route Component
-const ProtectedRoute = ({ element }) => {
-  return isAuthenticated() ? element : <Navigate to="/page-not-found" replace />;
+// Function to get the user's role from localStorage
+const getUserRole = () => {
+  return localStorage.getItem("role");
+};
+
+// Protected Route Component (Role-Based)
+const ProtectedRoute = ({ element, allowedRoles }) => {
+  const role = getUserRole();
+  
+  // Check if the user is authenticated and if their role matches one of the allowed roles for the route
+  return isAuthenticated() && allowedRoles.includes(role) ? element : <Navigate to="/page-not-found" replace />;
 };
 
 // Login Route Protection - if token exists, redirect to homepage
@@ -42,23 +50,26 @@ const App = () => {
         <Route path="/login" element={<LoginRedirect />} />
 
         {/* Protected Routes (Require Authentication) */}
-        <Route path="/lost-itemsPost" element={<ProtectedRoute element={<LostItem />} />} />
-        <Route path="/foundItems" element={<ProtectedRoute element={<FoundItemsPage />} />} />
-        <Route path="/foundItemReport" element={<ProtectedRoute element={<FoundItem />} />} />
-        <Route path="/lostitems" element={<ProtectedRoute element={<LostItemsPage />} />} />
-        <Route path="/lostitem/:id" element={<ProtectedRoute element={<LostItemDetails />} />} />
-        <Route path="/foundid/:id" element={<ProtectedRoute element={<FoundItemDetails />} />} />
-        <Route path="/communitychat" element={<ProtectedRoute element={<CommunityChat />} />} />
-        <Route path="/account" element={<ProtectedRoute element={<Account />} />} />
-        <Route path="/logout" element={<ProtectedRoute element={<Logout />} />} />
-        <Route path="/admin" element={<ProtectedRoute element={<AdminDashboard />} />} />
-        <Route path="/user" element={<ProtectedRoute element={<UserDashboard />} />} />
+        <Route path="/lost-itemsPost" element={<ProtectedRoute element={<LostItem />} allowedRoles={['User', 'Admin']}  />} />
+        <Route path="/foundItems" element={<ProtectedRoute element={<FoundItemsPage />} allowedRoles={['User', 'Admin']}  />} />
+        <Route path="/foundItemReport" element={<ProtectedRoute element={<FoundItem />} allowedRoles={['User', 'Admin']}  />} />
+        <Route path="/lostitems" element={<ProtectedRoute element={<LostItemsPage />} allowedRoles={['User', 'Admin']}  />} />
+        <Route path="/lostitem/:id" element={<ProtectedRoute element={<LostItemDetails />} allowedRoles={['User', 'Admin']}  />} />
+        <Route path="/foundid/:id" element={<ProtectedRoute element={<FoundItemDetails />} allowedRoles={['User', 'Admin']} />} />
+        <Route path="/communitychat" element={<ProtectedRoute element={<CommunityChat />} allowedRoles={['User', 'Admin']} />} />
+        <Route path="/account" element={<ProtectedRoute element={<Account />} allowedRoles={['User']} />} />
+        <Route path="/logout" element={<ProtectedRoute element={<Logout />} allowedRoles={['User', 'Admin']} />} />
+
+        {/* Admin Dashboard - Only Accessible by Admin */}
+        <Route path="/admin" element={<ProtectedRoute element={<AdminDashboard />} allowedRoles={['Admin']} />} />
+
+        {/* User Dashboard - Only Accessible by User */}
+        <Route path="/user" element={<ProtectedRoute element={<UserDashboard />} allowedRoles={['User']} />} />
 
         {/* 404 Page for Unauthorized Access */}
         <Route path="/page-not-found" element={<PageNotFound />} />
 
-        {/* Catch-All for Unknown Routes */}
-        <Route path="*" element={<Navigate to="/page-not-found" replace />} />
+     
       </Routes>
     </Router>
   );

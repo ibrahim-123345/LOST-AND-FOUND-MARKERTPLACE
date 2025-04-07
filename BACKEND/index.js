@@ -11,6 +11,7 @@ const {
   loginController,UserToken,passwordReset,
   deleteUser,userUpdate,
   userBasedonToken,
+  FindRegisteredUsers,
 } = require("./controllers/authcontroller");
 const {
   lostItemController,lostItem,lostItemId,itemLostByUser,
@@ -59,6 +60,7 @@ app.delete("/user/delete/:id", verfyToken,checkRoles(["Admin"]), deleteUser);
 app.patch("/user/update/:id", verfyToken,checkRoles(["Admin","User"]), userUpdate);
 app.post("/password/reset", verfyToken,checkRoles(["Admin","User"]) ,passwordReset);
 app.get("/user/getuserBasedonToken",verfyToken,checkRoles(["Admin","User"]),userBasedonToken)
+app.get("/user/Getuser",verfyToken,checkRoles(["Admin"]),FindRegisteredUsers)
 
 
 
@@ -77,7 +79,7 @@ app.get("/lostItemsByUser/:id",verfyToken,checkRoles(["Admin","User"]),itemLostB
 
 
 
-
+//found items crud
 
 app.post("/foundItems",verfyToken,checkRoles(["Admin","User"]),upload.single('image'), foundItemController);
 app.get("/foundItems", foundItems);
@@ -96,10 +98,15 @@ app.post("/post/chats",verfyToken,checkRoles(["Admin","User"]), postChatControll
 app.get("/User/chats",verfyToken,checkRoles(["Admin","User"]), chatController);
 
 
+
+
+//chats crud and reports
+
+
 app.get('/chat/messages',verfyToken,checkRoles(["Admin","User"]), getMessages);
 app.post('/chat/messages',verfyToken,checkRoles(["Admin","User"]), sendMessage);
 
-
+//port listering
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });

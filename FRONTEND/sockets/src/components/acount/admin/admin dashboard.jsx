@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { 
-  Container, Card, Button, Table, Tabs, Tab, 
-  Row, Col, Image, Form, Modal, Alert 
+import {
+  Container, Card, Button, Table, Tabs, Tab,
+  Row, Col, Image, Form, Modal
 } from "react-bootstrap";
-import { 
-  FaUsers, FaBox, FaFlag, FaComments, 
+import {
+  FaUsers, FaBox, FaFlag, FaComments,
   FaUserCog, FaEdit, FaKey, FaSignOutAlt,
-  FaUserCircle, FaImage, FaTrash
+  FaUserCircle, FaTrash, FaBan, FaSearch
 } from "react-icons/fa";
 import "bootstrap/dist/css/bootstrap.min.css";
+import axiosInstance from "../../../axiosInstance";
 
 const AdminDashboard = () => {
   const [key, setKey] = useState("users");
@@ -16,58 +17,83 @@ const AdminDashboard = () => {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [avatarFile, setAvatarFile] = useState(null);
-  
-  const [adminProfile, setAdminProfile] = useState({
-    name: "Admin User",
-    email: "admin@example.com",
-    avatar: "",
-    role: "Super Admin"
-  });
-  
-  // Mock data states with empty arrays initially
   const [users, setUsers] = useState([]);
-  const [items, setItems] = useState([]);
-  const [reports, setReports] = useState([]);
-  const [chats, setChats] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [foundItems, setFoundItems] = useState([]);
+  const [lostItems, setLostItems] = useState([]);
+  const [adminProfile, setAdminProfile] = useState({
+    name: "Super User",
+    email: "admin@gmail.com",
+    avatar: "",
+    role: "Admin",
+  });
+
+  const [previewImage, setPreviewImage] = useState(null);
+
+  const fetchAdminProfile = async () => {
+    try {
+      const response = await axiosInstance.get("/user/getuserBasedonToken");
+      const { user: [{ username, email, role }] } = response.data;
+      setAdminProfile({
+        name: username,
+        email,
+        avatar: "",
+        role,
+      });
+    } catch (error) {
+      console.error("Failed to fetch admin profile", error);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const response = await axiosInstance.get("/user/Getuser");
+      setUsers(response.data);
+    } catch (error) {
+      console.error("Failed to fetch users", error);
+    }
+  };
+
+  const fetchFoundItems = async () => {
+    try {
+      const response = await axiosInstance.get("/foundItems");
+      setFoundItems(response.data);
+    } catch (error) {
+      console.error("Failed to fetch found items", error);
+    }
+  };
+
+  const fetchLostItems = async () => {
+    try {
+      const response = await axiosInstance.get("/lostItem");
+      setLostItems(response.data);
+    } catch (error) {
+      console.error("Failed to fetch lost items", error);
+    }
+  };
+
+  const fetchData = async () => {
+    setLoading(true);
+    await fetchAdminProfile();
+    await fetchUsers();
+    await fetchFoundItems();
+    await fetchLostItems();
+    setLoading(false);
+  };
 
   useEffect(() => {
-    // Simulate API loading
-    setTimeout(() => {
-      // Load mock data - you would replace this with actual API calls
-      setUsers([
-        { id: 1, name: "Admin User", email: "admin@example.com", role: "admin" },
-        { id: 2, name: "Regular User", email: "user@example.com", role: "user" }
-      ]);
-      
-      setItems([]); // Empty items for demonstration
-      
-      setReports([
-        { id: 1, description: "Inappropriate content", reported_by: "user1", status: "Pending" }
-      ]);
-      
-      setChats([]); // Empty chats for demonstration
-      
-      setLoading(false);
-    }, 1000);
+    fetchData();
   }, []);
 
   const handleProfileUpdate = (e) => {
     e.preventDefault();
-    // In a real app, you would upload the avatarFile and update the profile
     if (avatarFile) {
       const newAvatarUrl = URL.createObjectURL(avatarFile);
-      setAdminProfile({...adminProfile, avatar: newAvatarUrl});
+      setAdminProfile({ ...adminProfile, avatar: newAvatarUrl });
     }
     setShowProfileModal(false);
     setAvatarPreview(null);
     setAvatarFile(null);
-  };
-
-  const handlePasswordChange = (e) => {
-    e.preventDefault();
-    // Add password change logic here
-    setShowPasswordModal(false);
   };
 
   const handleAvatarChange = (e) => {
@@ -78,10 +104,34 @@ const AdminDashboard = () => {
     }
   };
 
-  const removeAvatar = () => {
-    setAvatarPreview(null);
-    setAvatarFile(null);
-    setAdminProfile({...adminProfile, avatar: ""});
+  const handleDeleteUser = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this user?")) return;
+    try {
+      await axiosInstance.delete(`/user/delete/${id}`);
+      fetchUsers();
+    } catch (error) {
+      console.error("Failed to delete user:", error);
+    }
+  };
+
+  const handleDeleteFoundItem = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this found item?")) return;
+    try {
+      await axiosInstance.delete(`/items/found/${id}`);
+      fetchFoundItems();
+    } catch (error) {
+      console.error("Failed to delete found item:", error);
+    }
+  };
+
+  const handleDeleteLostItem = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this lost item?")) return;
+    try {
+      await axiosInstance.delete(`/items/lost/${id}`);
+      fetchLostItems();
+    } catch (error) {
+      console.error("Failed to delete lost item:", error);
+    }
   };
 
   const renderEmptyState = (message) => (
@@ -92,63 +142,55 @@ const AdminDashboard = () => {
     </Card>
   );
 
+  const getRoleBadge = (role) => {
+    switch (role) {
+      case "Admin":
+        return <span className="badge bg-primary">{role}</span>;
+      case "User":
+        return <span className="badge bg-success">{role}</span>;
+      case "Moderator":
+        return <span className="badge bg-warning text-dark">{role}</span>;
+      default:
+        return <span className="badge bg-secondary">{role}</span>;
+    }
+  };
+
   return (
     <Container className="py-4">
-      {/* Admin Profile Section */}
       <Card className="mb-4 border-0 shadow-sm">
         <Card.Body className="p-4">
           <Row className="align-items-center">
             <Col md={2} className="text-center mb-3 mb-md-0">
               {adminProfile.avatar ? (
-                <Image 
-                  src={adminProfile.avatar} 
-                  roundedCircle 
-                  width={100} 
-                  height={100} 
+                <Image
+                  src={adminProfile.avatar}
+                  roundedCircle
+                  width={100}
+                  height={100}
                   className="border object-fit-cover"
-                  alt="Admin avatar"
                 />
               ) : (
-                <div className="d-flex justify-content-center align-items-center bg-light rounded-circle" 
-                  style={{width: 100, height: 100}}>
+                <div className="d-flex justify-content-center align-items-center bg-light rounded-circle"
+                  style={{ width: 100, height: 100 }}>
                   <FaUserCircle size={60} className="text-secondary" />
                 </div>
               )}
             </Col>
-            <Col md={6} className="mb-3 mb-md-0">
+            <Col md={6}>
               <h3 className="mb-2">{adminProfile.name}</h3>
-              <p className="text-muted mb-1">
-                <strong>Email:</strong> {adminProfile.email}
-              </p>
-              <p className="text-muted">
-                <strong>Role:</strong> <span className="badge bg-primary">{adminProfile.role}</span>
-              </p>
+              <p className="text-muted mb-1"><strong>Email:</strong> {adminProfile.email}</p>
+              <p className="text-muted"><strong>Role:</strong> {getRoleBadge(adminProfile.role)}</p>
             </Col>
             <Col md={4} className="d-flex flex-column flex-md-row justify-content-md-end gap-2">
-              <Button 
-                variant="outline-primary" 
-                className="text-nowrap"
-                onClick={() => setShowProfileModal(true)}
-              >
-                <FaEdit className="me-1" /> Edit Profile
-              </Button>
-              <Button 
-                variant="outline-secondary" 
-                className="text-nowrap"
-                onClick={() => setShowPasswordModal(true)}
-              >
-                <FaKey className="me-1" /> Change Password
-              </Button>
-              <Button variant="outline-danger" className="text-nowrap">
-                <FaSignOutAlt className="me-1" /> Logout
-              </Button>
+              <Button variant="outline-primary" onClick={() => setShowProfileModal(true)}><FaEdit className="me-1" /> Edit Profile</Button>
+              <Button variant="outline-secondary" onClick={() => setShowPasswordModal(true)}><FaKey className="me-1" /> Change Password</Button>
+              <Button variant="outline-danger"><FaSignOutAlt className="me-1" /> Logout</Button>
             </Col>
           </Row>
         </Card.Body>
       </Card>
 
-      {/* Dashboard Tabs */}
-      <h2 className="mb-3">Dashboard</h2>
+      <h2 className="mb-3">Admin Dashboard</h2>
       <Tabs activeKey={key} onSelect={(k) => setKey(k)} className="mb-3">
         <Tab eventKey="users" title={<><FaUsers className="me-1" /> Users</>}>
           {loading ? (
@@ -157,196 +199,169 @@ const AdminDashboard = () => {
             <Card className="border-0 shadow-sm">
               <Card.Body>
                 <Table striped bordered hover responsive>
-                  {/* Users table content */}
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Role</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {users.map((user, index) => (
+                      <tr key={user._id}>
+                        <td>{index + 1}</td>
+                        <td>{user.username}</td>
+                        <td>{user.email}</td>
+                        <td>{getRoleBadge(user.role)}</td>
+                        <td>{user.status || "Active"}</td>
+                        <td>
+                          {user.role === "Admin" ? (
+                            <span className="text-muted">Admin can't be deleted or blocked</span>
+                          ) : (
+                            <>
+                              <Button variant="danger" size="sm" className="me-2" onClick={() => handleDeleteUser(user._id)}>
+                                <FaTrash /> Delete
+                              </Button>
+                              <Button variant="warning" size="sm" onClick={() => alert(`Block user logic for user ID: ${user._id}`)}>
+                                <FaBan /> Block
+                              </Button>
+                            </>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
                 </Table>
               </Card.Body>
             </Card>
           ) : (
-            renderEmptyState("No users found")
+            renderEmptyState("No users found.")
           )}
         </Tab>
-        <Tab eventKey="items" title={<><FaBox className="me-1" /> Items</>}>
+
+        <Tab eventKey="foundItems" title={<><FaBox className="me-1" /> Found Items</>}>
           {loading ? (
-            <div className="text-center py-5">Loading items...</div>
-          ) : items.length > 0 ? (
+            <div className="text-center py-5">Loading found items...</div>
+          ) : foundItems.length > 0 ? (
             <Card className="border-0 shadow-sm">
               <Card.Body>
                 <Table striped bordered hover responsive>
-                  {/* Items table content */}
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Image</th>
+                      <th>Item Name</th>
+                      <th>Description</th>
+                      <th>Location Found</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {foundItems.map((item, index) => (
+                      <tr key={item._id}>
+                        <td>{index + 1}</td>
+                        <td>
+                          {item.image ? (
+                            <Image
+                              src={item.image}
+                              width={60}
+                              height={60}
+                              rounded
+                              style={{ cursor: "pointer", objectFit: "cover" }}
+                              onClick={() => setPreviewImage(item.image)}
+                            />
+                          ) : <span className="text-muted">No image</span>}
+                        </td>
+                        <td>{item.name}</td>
+                        <td>{item.description}</td>
+                        <td>{item.location}</td>
+                        <td>{item.status || "Available"}</td>
+                        <td>
+                          <Button variant="danger" size="sm" className="me-2" onClick={() => handleDeleteFoundItem(item._id)}>
+                            <FaTrash /> Delete
+                          </Button>
+                          <Button variant="warning" size="sm" onClick={() => alert(`Block found item logic for item ID: ${item._id}`)}>
+                            <FaBan /> Block
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
                 </Table>
               </Card.Body>
             </Card>
           ) : (
-            renderEmptyState("No items found. Add your first item to get started.")
+            renderEmptyState("No found items available.")
           )}
         </Tab>
-        <Tab eventKey="reports" title={<><FaFlag className="me-1" /> Reports</>}>
+
+        <Tab eventKey="lostItems" title={<><FaBox className="me-1" /> Lost Items</>}>
           {loading ? (
-            <div className="text-center py-5">Loading reports...</div>
-          ) : reports.length > 0 ? (
+            <div className="text-center py-5">Loading lost items...</div>
+          ) : lostItems.length > 0 ? (
             <Card className="border-0 shadow-sm">
               <Card.Body>
                 <Table striped bordered hover responsive>
-                  {/* Reports table content */}
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Image</th>
+                      <th>Item Name</th>
+                      <th>Description</th>
+                      <th>Location Lost</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {lostItems.map((item, index) => (
+                      <tr key={item._id}>
+                        <td>{index + 1}</td>
+                        <td>
+                          {item.image ? (
+                            <Image
+                              src={item.image}
+                              width={60}
+                              height={60}
+                              rounded
+                              style={{ cursor: "pointer", objectFit: "cover" }}
+                              onClick={() => setPreviewImage(item.image)}
+                            />
+                          ) : <span className="text-muted">No image</span>}
+                        </td>
+                        <td>{item.name}</td>
+                        <td>{item.description}</td>
+                        <td>{item.location}</td>
+                        <td>{item.status || "Missing"}</td>
+                        <td>
+                          <Button variant="danger" size="sm" className="me-2" onClick={() => handleDeleteLostItem(item._id)}>
+                            <FaTrash /> Delete
+                          </Button>
+                          <Button variant="warning" size="sm" onClick={() => alert(`Block lost item logic for item ID: ${item._id}`)}>
+                            <FaBan /> Block
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
                 </Table>
               </Card.Body>
             </Card>
           ) : (
-            renderEmptyState("No reports to display. Everything looks good!")
-          )}
-        </Tab>
-        <Tab eventKey="chats" title={<><FaComments className="me-1" /> Chats</>}>
-          {loading ? (
-            <div className="text-center py-5">Loading chats...</div>
-          ) : chats.length > 0 ? (
-            <Card className="border-0 shadow-sm">
-              <Card.Body>
-                <Table striped bordered hover responsive>
-                  {/* Chats table content */}
-                </Table>
-              </Card.Body>
-            </Card>
-          ) : (
-            renderEmptyState("No active chat rooms")
+            renderEmptyState("No lost items available.")
           )}
         </Tab>
       </Tabs>
 
-      {/* Edit Profile Modal */}
-      <Modal show={showProfileModal} onHide={() => {
-        setShowProfileModal(false);
-        setAvatarPreview(null);
-        setAvatarFile(null);
-      }}>
-        <Modal.Header closeButton>
-          <Modal.Title>Edit Profile</Modal.Title>
-        </Modal.Header>
-        <Form onSubmit={handleProfileUpdate}>
-          <Modal.Body>
-            <Form.Group className="mb-4 text-center">
-              <div className="position-relative d-inline-block">
-                {avatarPreview || adminProfile.avatar ? (
-                  <>
-                    <Image 
-                      src={avatarPreview || adminProfile.avatar} 
-                      roundedCircle 
-                      width={120} 
-                      height={120} 
-                      className="border object-fit-cover mb-2"
-                      alt="Avatar preview"
-                    />
-                    <Button 
-                      variant="danger" 
-                      size="sm" 
-                      className="position-absolute top-0 end-0 rounded-circle"
-                      onClick={removeAvatar}
-                    >
-                      <FaTrash size={12} />
-                    </Button>
-                  </>
-                ) : (
-                  <div className="d-flex justify-content-center align-items-center bg-light rounded-circle mb-2" 
-                    style={{width: 120, height: 120}}>
-                    <FaUserCircle size={60} className="text-secondary" />
-                  </div>
-                )}
-                <div>
-                  <Form.Label 
-                    htmlFor="avatarUpload" 
-                    className="btn btn-sm btn-outline-primary mt-2"
-                  >
-                    <FaImage className="me-1" /> {avatarPreview ? "Change" : "Upload"} Avatar
-                  </Form.Label>
-                  <Form.Control 
-                    type="file" 
-                    id="avatarUpload" 
-                    accept="image/*" 
-                    className="d-none"
-                    onChange={handleAvatarChange}
-                  />
-                </div>
-              </div>
-            </Form.Group>
-            
-            <Form.Group className="mb-3">
-              <Form.Label>Name</Form.Label>
-              <Form.Control 
-                type="text" 
-                value={adminProfile.name}
-                onChange={(e) => setAdminProfile({...adminProfile, name: e.target.value})}
-                required
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Email</Form.Label>
-              <Form.Control 
-                type="email" 
-                value={adminProfile.email}
-                onChange={(e) => setAdminProfile({...adminProfile, email: e.target.value})}
-                required
-              />
-            </Form.Group>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="outline-secondary" onClick={() => {
-              setShowProfileModal(false);
-              setAvatarPreview(null);
-              setAvatarFile(null);
-            }}>
-              Cancel
-            </Button>
-            <Button variant="primary" type="submit">
-              Save Changes
-            </Button>
-          </Modal.Footer>
-        </Form>
-      </Modal>
-
-      {/* Change Password Modal */}
-      <Modal show={showPasswordModal} onHide={() => setShowPasswordModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Change Password</Modal.Title>
-        </Modal.Header>
-        <Form onSubmit={handlePasswordChange}>
-          <Modal.Body>
-            <Form.Group className="mb-3">
-              <Form.Label>Current Password</Form.Label>
-              <Form.Control 
-                type="password" 
-                placeholder="Enter current password" 
-                required
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>New Password</Form.Label>
-              <Form.Control 
-                type="password" 
-                placeholder="Enter new password" 
-                minLength="8"
-                required
-              />
-              <Form.Text className="text-muted">
-                Password must be at least 8 characters long
-              </Form.Text>
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Confirm New Password</Form.Label>
-              <Form.Control 
-                type="password" 
-                placeholder="Confirm new password" 
-                required
-              />
-            </Form.Group>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="outline-secondary" onClick={() => setShowPasswordModal(false)}>
-              Cancel
-            </Button>
-            <Button variant="primary" type="submit">
-              Update Password
-            </Button>
-          </Modal.Footer>
-        </Form>
+      {/* Image Preview Modal */}
+      <Modal show={!!previewImage} onHide={() => setPreviewImage(null)} centered size="lg">
+        <Modal.Body className="p-0">
+          <Image src={previewImage} fluid style={{ width: "100%", objectFit: "contain" }} />
+        </Modal.Body>
       </Modal>
     </Container>
   );
