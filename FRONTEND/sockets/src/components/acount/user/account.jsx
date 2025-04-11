@@ -266,7 +266,7 @@ const UserDashboard = () => {
           {loading ? (
             <p className="text-center py-4">Loading...</p>
           ) : foundItems.length === 0 ? (
-            renderFoundEmptyState("Seems like you're not lucky yet", "Add Item You've Found", "/found-itemsPost")
+            renderFoundEmptyState("Seems like you're not lucky yet", "Add Item You've Found", "/foundItemReport")
           ) : (
             renderFoundItemsTable()
           )}
@@ -276,7 +276,7 @@ const UserDashboard = () => {
           {loading ? (
             <p className="text-center py-4">Loading...</p>
           ) : lostItems.length === 0 ? (
-            renderLostEmptyState("Seems like you've never lost anything", "Want to Add Item?", "/foundItemReport")
+            renderLostEmptyState("Seems like you've never lost anything", "Want to Add Item?", "/lost-itemsPost")
           ) : (
             renderLostItemsTable()
           )}

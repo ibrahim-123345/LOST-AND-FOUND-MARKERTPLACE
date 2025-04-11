@@ -10,6 +10,7 @@ import {
 } from "react-icons/fa";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axiosInstance from "../../../axiosInstance";
+import { Link, useNavigate } from "react-router-dom";
 
 const AdminDashboard = () => {
   const [key, setKey] = useState("users");
@@ -184,7 +185,7 @@ const AdminDashboard = () => {
             <Col md={4} className="d-flex flex-column flex-md-row justify-content-md-end gap-2">
               <Button variant="outline-primary" onClick={() => setShowProfileModal(true)}><FaEdit className="me-1" /> Edit Profile</Button>
               <Button variant="outline-secondary" onClick={() => setShowPasswordModal(true)}><FaKey className="me-1" /> Change Password</Button>
-              <Button variant="outline-danger"><FaSignOutAlt className="me-1" /> Logout</Button>
+              <Button as={Link} to="/logout" variant="outline-danger"><FaSignOutAlt className="me-1" /> Logout</Button>
             </Col>
           </Row>
         </Card.Body>

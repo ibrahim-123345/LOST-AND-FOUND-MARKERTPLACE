@@ -37,17 +37,18 @@ const lostItemController = async (req, res) => {
   try {
     await Dbconnection(); // Ensure DB is connected
 
-    const { name, description, date, location, contactInfo ,user} = req.body;
+    const { name, description, dateLost, location, contactInfo ,user} = req.body;
     const image = req.file ? `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}` : null; // Full image URL
 
     // Create lost item entry
     const newItem = await createLostItem(
       name,
       description,
-      date,
+      dateLost,
       location,
       contactInfo,
-      image
+      image,
+      user
     );
 
     res.status(201).json({ message: "Item added successfully", newItem });
