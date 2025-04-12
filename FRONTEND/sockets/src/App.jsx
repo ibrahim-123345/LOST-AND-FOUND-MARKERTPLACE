@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 import LoginForm from './components/login/loginForm';
 import HomePage from './home';
-import LostItem from './components/lostitems/lostItemUpload';
+//import LostItem from './components/lostitems/lostItemUpload';
 import FoundItem from './components/founditems/foundItemForm';
 import LostItemsPage from './components/lostitems/lostitemDisplay';
 import LostItemDetails from './components/lostitems/lostitemDisplayD';
@@ -17,6 +17,7 @@ import Logout from "./components/login/logout";
 import AdminDashboard from './components/acount/admin/admin dashboard';
 import UserDashboard from './components/acount/user/account';
 import LostAndFoundDashboard from './components/acount/user/account';
+import LostItemUpload from './components/lostitems/lostItemUpload';
 
 // Function to check if a user is authenticated
 const isAuthenticated = () => {
@@ -50,7 +51,7 @@ const App = () => {
         <Route path="/login" element={<LoginRedirect />} />
 
         {/* Protected Routes (Require Authentication) */}
-        <Route path="/lost-itemsPost" element={<ProtectedRoute element={<LostItem />} allowedRoles={['User', 'Admin']}  />} />
+        <Route path="/lost-itemsPost" element={<ProtectedRoute element={<LostItemUpload />} allowedRoles={['User', 'Admin']}  />} />
         <Route path="/foundItems" element={<ProtectedRoute element={<FoundItemsPage />} allowedRoles={['User', 'Admin']}  />} />
         <Route path="/foundItemReport" element={<ProtectedRoute element={<FoundItem />} allowedRoles={['User', 'Admin']}  />} />
         <Route path="/lostitems" element={<ProtectedRoute element={<LostItemsPage />} allowedRoles={['User', 'Admin']}  />} />

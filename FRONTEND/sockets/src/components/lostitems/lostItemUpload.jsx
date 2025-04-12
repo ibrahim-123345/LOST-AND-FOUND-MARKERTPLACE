@@ -3,9 +3,9 @@ import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axiosInstance from "../../axiosInstance";
 
-const url = "post/lostItem"; // Make sure this matches your backend route
+const url = "/post/lostItem"; // Make sure this matches your backend route
 
-const LostItem = () => {
+const LostItemUpload = () => {
   const [itemName, setItemName] = useState("");
   const [description, setDescription] = useState("");
   const [dateLost, setDateLost] = useState("");
@@ -163,4 +163,4 @@ const LostItem = () => {
   );
 };
 
-export default LostItem;
+export default LostItemUpload;

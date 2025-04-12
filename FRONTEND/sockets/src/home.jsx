@@ -111,7 +111,7 @@ const HomePage = () => {
               ? [
                   { to: "/founditems", icon: <FaSearch />, label: "Found Items" },
                   { to: "/lostitems", icon: <FaBoxOpen />, label: "Lost items" },
-                  { to: "/lost-items", icon: <FaPlus />, label: "Report Item Lost" },
+                  { to: "/lost-itemsPost", icon: <FaPlus />, label: "Report Item Lost" },
                   { to: "/communitychat", icon: <FaComments />, label: "Community Chat" },
                   { to: "/logout", icon: <FaSignOutAlt />, label: "Logout" },
                   { icon: <FaUserCircle />, label: "Account", onClick: handleAccountClick }
