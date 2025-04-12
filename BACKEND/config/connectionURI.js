@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
  require("dotenv").config();
 
-const connec = process.env.DB_URI||'mongodb://127.0.0.1:27017/User';
+const connec = process.env.DB_URI||'mongodb://localhost:27017/User';
 
 const Dbconnection = async () => {
   try {
@@ -10,11 +10,13 @@ const Dbconnection = async () => {
 
     const conn = mongoose.connection;
 
-    if (conn.on) console.log("");
+    
   } catch (e) {
     console.log("error in database connection");
   }
 };
+
+
 
 
 

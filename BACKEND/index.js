@@ -66,6 +66,7 @@ app.get("/user/Getuser",verfyToken,checkRoles(["Admin"]),FindRegisteredUsers)
 
 //lost item crud
 app.get("/lostItems",verfyToken,checkRoles(["Admin","User"]),lostItem);//this endpoint have limit
+
 app.get("/lostItem/:id",verfyToken,checkRoles(["Admin","User"]),lostItemId);//this endpoint to specific based input id
 
 app.get("/lostItem",verfyToken,lostItems);//this endpoint have no limit it displays all losts item reported
