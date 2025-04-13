@@ -1,16 +1,53 @@
 const express = require('express');
+const {Report,createReport}=require("../models/reports");
+const { Dbconnection } = require('../config/connectionURI');
 
 const router = express.Router();
 
 // Controller functions
-const getReports = (req, res) => {
-    // Logic to get reports
-    res.send('Get all reports');
+const getReports = async(req, res) => {
+    try{
+
+        await Dbconnection()
+        const response =await Report.find()
+        res.send(response);
+
+
+
+    }
+
+
+    catch(err){
+
+        res.status(500).json({ error: "Server Error" });
+
+    }
+    
+   
 };
 
-const createReport = (req, res) => {
-    // Logic to create a new report
-    res.send('Create a new report');
+const createReportHandler = async(req, res) => {
+
+    const{newReport}=req.body;
+    const{report,createdAt,username}=newReport
+    try{
+
+        await Dbconnection()
+        await createReport(report,username,createdAt)
+      
+
+
+        res.status(201).json({ success: "Seccesfully reported" });
+
+
+    }
+
+    catch(err){
+        res.status(500).json({ error: "Server Error" });
+
+    }
+   
+    
 };
 
 const updateReport = (req, res) => {
@@ -24,9 +61,4 @@ const deleteReport = (req, res) => {
 };
 
 // Routes
-router.get('/', getReports);
-router.post('/', createReport);
-router.put('/:id', updateReport);
-router.delete('/:id', deleteReport);
-
-module.exports = router;
+module.exports={deleteReport,updateReport,createReportHandler,getReports}

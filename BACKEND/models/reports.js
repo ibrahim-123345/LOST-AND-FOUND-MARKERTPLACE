@@ -1,14 +1,37 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const{User}=require('./UserModels')
-// Report Schema for storing user-submitted reports
+const {Dbconnection}=require("../config/connectionURI")
+
 const reportSchema = new Schema(
   {
-    report: { type: String, required: true }, // Text description of the reported issue
-    createdAt: { type: Date, default: Date.now }, // Timestamp when the report was created
+    report: { type: String, required: true }, 
+    username:{type:String,required:true},
+    createdAt: { type: Date, default: Date.now }, 
   },
   { timestamps: true }
 );
 
+
 const Report = mongoose.model("Report", reportSchema);
-module.exports = Report;
+
+
+const createReport = async (report,username,time) => {
+  try {
+    await Dbconnection();
+    const item = new Report({
+      report,
+      username,
+      time});
+     
+    await item.save();
+    console.log("new Report created successfully");
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+
+
+
+
+module.exports = {Report,createReport};

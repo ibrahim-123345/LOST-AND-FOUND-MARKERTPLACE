@@ -33,7 +33,7 @@ const HomePage = () => {
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
 
-  const role= localStorage.getItem("role") || "User";
+  const role = localStorage.getItem("role") || "User";
 
   useEffect(() => {
     fetchFoundItems();
@@ -93,68 +93,97 @@ const HomePage = () => {
           flexDirection: "column",
           alignItems: "center",
           top: 0,
-          left: 0
+          left: 0,
+          overflow: "hidden"
         }}
       >
-        <Button
-          variant="link"
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          style={{ color: "white", fontSize: "32px" }}
+        {/* Sidebar header (fixed) */}
+        <div style={{ flexShrink: 0 }}>
+          <Button
+            variant="link"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            style={{ color: "white", fontSize: "32px" }}
+          >
+            {sidebarOpen ? <FaTimes /> : <FaBars />}
+          </Button>
+        </div>
+
+        {/* Scrollable content area */}
+        <div
+          style={{
+            width: "100%",
+            flexGrow: 1,
+            overflowY: "auto",
+            paddingBottom: "20px",
+            scrollbarWidth: "thin",
+            scrollbarColor: `${isDarkMode ? "#555 #333" : "#90A4AE #E1F5FE"}`,
+            "&::-webkit-scrollbar": {
+              width: "8px"
+            },
+            "&::-webkit-scrollbar-track": {
+              background: isDarkMode ? "#333" : "#E1F5FE"
+            },
+            "&::-webkit-scrollbar-thumb": {
+              background: isDarkMode ? "#555" : "#90A4AE",
+              borderRadius: "4px"
+            }
+          }}
         >
-          {sidebarOpen ? <FaTimes /> : <FaBars />}
-        </Button>
+          <nav style={{ marginTop: "40px", width: "100%" }}>
+            {[
+              { to: "/", icon: <FaHome />, label: "Home" },
+              ...(token
+                ? [
+                    { to: "/founditems", icon: <FaSearch />, label: "Found Items" },
+                    { to: "/lostitems", icon: <FaBoxOpen />, label: "Lost items" },
+                    { to: "/lost-itemsPost", icon: <FaPlus />, label: "Report Item Lost" },
+                    { to: "/communitychat", icon: <FaComments />, label: "Community Chat" },
+                    { icon: <FaUserCircle />, label: "Account", onClick: handleAccountClick },
+                    { to: "/logout", icon: <FaSignOutAlt />, label: "Logout" },
+                  ]
+                : [{ to: "/login", icon: <FaSignInAlt />, label: "Login" }])
+            ].map(({ to, icon, label, onClick }, index) => {
+              const commonStyles = {
+                display: "flex",
+                alignItems: "center",
+                gap: sidebarOpen ? "20px" : "0",
+                fontSize: "18px",
+                padding: "15px 10px",
+                color: "white",
+                transition: "0.3s",
+                textDecoration: "none",
+                cursor: "pointer"
+              };
 
-        <nav style={{ marginTop: "40px", width: "100%" }}>
-          {[
-            { to: "/", icon: <FaHome />, label: "Home" },
-            ...(token
-              ? [
-                  { to: "/founditems", icon: <FaSearch />, label: "Found Items" },
-                  { to: "/lostitems", icon: <FaBoxOpen />, label: "Lost items" },
-                  { to: "/lost-itemsPost", icon: <FaPlus />, label: "Report Item Lost" },
-                  { to: "/communitychat", icon: <FaComments />, label: "Community Chat" },
-                  { to: "/logout", icon: <FaSignOutAlt />, label: "Logout" },
-                  { icon: <FaUserCircle />, label: "Account", onClick: handleAccountClick }
-                ]
-              : [{ to: "/login", icon: <FaSignInAlt />, label: "Login" }])
-          ].map(({ to, icon, label, onClick }, index) => {
-            const commonStyles = {
-              display: "flex",
-              alignItems: "center",
-              gap: sidebarOpen ? "20px" : "0",
-              fontSize: "18px",
-              padding: "15px 10px",
-              color: "white",
-              transition: "0.3s",
-              textDecoration: "none",
-              cursor: "pointer"
-            };
+              if (onClick) {
+                return (
+                  <div key={index} onClick={onClick} className="sidebar-item" style={commonStyles}>
+                    {sidebarOpen && <span style={{ fontSize: "24px" }}>{icon}</span>}
+                    {sidebarOpen && label}
+                  </div>
+                );
+              }
 
-            if (onClick) {
               return (
-                <div key={index} onClick={onClick} className="sidebar-item" style={commonStyles}>
+                <Link key={index} to={to} className="nav-link sidebar-item" style={commonStyles}>
                   {sidebarOpen && <span style={{ fontSize: "24px" }}>{icon}</span>}
                   {sidebarOpen && label}
-                </div>
+                </Link>
               );
-            }
+            })}
+          </nav>
+        </div>
 
-            return (
-              <Link key={index} to={to} className="nav-link sidebar-item" style={commonStyles}>
-                {sidebarOpen && <span style={{ fontSize: "24px" }}>{icon}</span>}
-                {sidebarOpen && label}
-              </Link>
-            );
-          })}
-        </nav>
-
-        <Button
-          variant="link"
-          onClick={toggleDarkMode}
-          style={{ color: "white", fontSize: "24px", marginTop: "20px" }}
-        >
-          {isDarkMode ? <FaSun /> : <FaMoon />}
-        </Button>
+        {/* Theme toggle (fixed at bottom) */}
+        <div style={{ flexShrink: 0, padding: "20px 0" }}>
+          <Button
+            variant="link"
+            onClick={toggleDarkMode}
+            style={{ color: "white", fontSize: "24px" }}
+          >
+            {isDarkMode ? <FaSun /> : <FaMoon />}
+          </Button>
+        </div>
       </div>
 
       {/* Main content */}

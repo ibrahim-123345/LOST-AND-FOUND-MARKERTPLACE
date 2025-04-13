@@ -33,7 +33,9 @@ const{upload}=require('./controllers/imagehandler')
 const { verfyToken } = require("./middlewares/virifyToken");
 const{checkRoles}=require('./middlewares/checkRoles')
 const { chatController ,postChatController} = require("./controllers/chatController");
-const router = express.Router();
+const { getReports ,createReportHandler} = require("./controllers/reports");
+
+
 
 
 const app = express();
@@ -104,8 +106,12 @@ app.get("/User/chats",verfyToken,checkRoles(["Admin","User"]), chatController);
 //chats crud and reports
 
 
-app.get('/chat/messages',verfyToken,checkRoles(["Admin","User"]), getMessages);
-app.post('/chat/messages',verfyToken,checkRoles(["Admin","User"]), sendMessage);
+app.get('/reports',verfyToken,checkRoles(["Admin","User"]), getReports);
+app.post('/reports',verfyToken,checkRoles(["Admin","User"]), createReportHandler);
+
+
+app.get('/community/messages',verfyToken,checkRoles(["Admin","User"]), getMessages);
+app.post('/community/messages',verfyToken,checkRoles(["Admin","User"]), sendMessage);
 
 //port listering
 app.listen(port, () => {

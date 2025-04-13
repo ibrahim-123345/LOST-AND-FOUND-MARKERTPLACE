@@ -15,7 +15,7 @@ const verfyToken = (req, res, next) => {
       username: decoded.object.userename, 
       role: decoded.object.role, 
     };
-    console.log(req.user)
+    //console.log(req.user)
  
     next(); 
   } catch (error) {

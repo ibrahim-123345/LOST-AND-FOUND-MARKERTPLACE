@@ -6,19 +6,28 @@ const Schema = mongoose.Schema;
 
 const chatSchema = new Schema(
   {
+
+    chatid: {
+      type: Number,
+      required: true,
+    },
+   
     username: {
       type: String,
       required: true,
+      default:"anonymous"
     },
-    chat: {
+    text: {
       type: String,
       required: true,
     },
-    roomid: {
-        type: String,
-        required: true,
-      },
-     
+
+    time:{
+
+      type: String,
+      default: Date.now,
+    }
+   
   },
   {
     timestamps: true,
@@ -27,16 +36,17 @@ const chatSchema = new Schema(
 
 const chatitem = mongoose.model("chat", chatSchema);
 
-const createchat = async (username, chat,roomid) => {
+const createchat = async (chatid,username,text,time) => {
   try {
     await Dbconnection();
     const item = new chatitem({
+      chatid,
       username,
-      chat,
-      roomid});
+      text,
+      time});
      
     await item.save();
-    console.log("new item created successfully");
+    console.log("new chat created successfully");
   } catch (e) {
     console.log(e);
   }

@@ -1,33 +1,25 @@
 const { Dbconnection } = require("../config/connectionURI");
 const { LostItem, createLostItem } = require("../models/losItem");
-const express = require('express');
+const express = require("express");
 const app = express();
-
-
 
 // Fetch all lost items
 const lostItem = async (req, res) => {
   try {
     await Dbconnection();
-    const items = await LostItem.find().limit(4).sort({createdAt:-1});
-    res.status(200).json(items); 
-    console.log(req.user)// Send the list of lost items with image URLs
+    const items = await LostItem.find().limit(4).sort({ createdAt: -1 });
+    res.status(200).json(items);
   } catch (error) {
-    console.error(error);
     res.status(500).json({ error: "Server Error" });
   }
 };
-
-
 
 const lostItems = async (req, res) => {
   try {
     await Dbconnection();
     const items = await LostItem.find();
-    res.status(200).json(items); 
-    console.log(req.user)// Send the list of lost items with image URLs
+    res.status(200).json(items);
   } catch (error) {
-    console.error(error);
     res.status(500).json({ error: "Server Error" });
   }
 };
@@ -37,8 +29,11 @@ const lostItemController = async (req, res) => {
   try {
     await Dbconnection(); // Ensure DB is connected
 
-    const { name, description, dateLost, location, contactInfo ,user} = req.body;
-    const image = req.file ? `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}` : null; // Full image URL
+    const { name, description, dateLost, location, contactInfo, user } =
+      req.body;
+    const image = req.file
+      ? `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`
+      : null; // Full image URL
 
     // Create lost item entry
     const newItem = await createLostItem(
@@ -53,13 +48,12 @@ const lostItemController = async (req, res) => {
 
     res.status(201).json({ message: "Item added successfully", newItem });
   } catch (error) {
-    console.error(error);
     res.status(400).json({ error: "Bad Request - Invalid Data" });
   }
 };
 
-const lostItemId=async(req,res)=>{
-  const {id}=req.params;
+const lostItemId = async (req, res) => {
+  const { id } = req.params;
   try {
     await Dbconnection();
     const item = await LostItem.findById(id);
@@ -67,16 +61,10 @@ const lostItemId=async(req,res)=>{
       return res.status(404).send("Item not found");
     }
     res.status(200).json(item);
-
-
-}
-
-catch(error){
-  console.error(error);
-  res.status(500).json({ error: "Server Error" });
-}
-
-}
+  } catch (error) {
+    res.status(500).json({ error: "Server Error" });
+  }
+};
 
 // Controller to delete lost item
 const deleteLostItem = async (req, res) => {
@@ -87,13 +75,12 @@ const deleteLostItem = async (req, res) => {
     const deletedItem = await LostItem.findOneAndDelete({ _id: id });
 
     if (!deletedItem) {
-      return res.status(404).send('Lost item not found');
+      return res.status(404).send("Lost item not found");
     }
 
-    console.log('Lost item deleted successfully');
-    res.status(200).send('Lost item deleted successfully');
+    res.status(200).send("Lost item deleted successfully");
   } catch (err) {
-    return res.status(500).send('Server error');
+    return res.status(500).send("Server error");
   }
 };
 
@@ -102,12 +89,16 @@ const LostItemUpddate = async (req, res) => {
   const { id } = req.params;
   const updateData = req.body;
   if (req.file) {
-    updateData.image = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`; // Full image URL
+    updateData.image = `${req.protocol}://${req.get("host")}/uploads/${
+      req.file.filename
+    }`; // Full image URL
   }
 
   try {
     await Dbconnection();
-    const update = await LostItem.findOneAndUpdate({ _id: id }, updateData, { new: true });
+    const update = await LostItem.findOneAndUpdate({ _id: id }, updateData, {
+      new: true,
+    });
 
     if (!update) {
       return res.status(404).send("Lost item was not found");
@@ -119,24 +110,24 @@ const LostItemUpddate = async (req, res) => {
   }
 };
 
-
-
-const itemLostByUser=async(req,res)=>{
+const itemLostByUser = async (req, res) => {
   const { id } = req.params;
 
   try {
     await Dbconnection();
-     const item = await LostItem.find({ user: id });
-     res.status(200).json(item);
-
-  
-   
-    
+    const item = await LostItem.find({ user: id });
+    res.status(200).json(item);
   } catch (err) {
     return res.status(500).send("Server error");
   }
 };
 
-
-
-module.exports = { lostItemController, lostItemId,lostItem,lostItems, deleteLostItem, LostItemUpddate,itemLostByUser };
+module.exports = {
+  lostItemController,
+  lostItemId,
+  lostItem,
+  lostItems,
+  deleteLostItem,
+  LostItemUpddate,
+  itemLostByUser,
+};
