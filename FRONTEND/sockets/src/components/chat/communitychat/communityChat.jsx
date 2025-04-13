@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Button, Form, ListGroup, Card, Badge, InputGroup } from "react-bootstrap";
-import { FaComment, FaExclamationCircle } from "react-icons/fa";
+import { FaComment, FaExclamationCircle, FaUsers, FaInfoCircle, FaRegLightbulb } from "react-icons/fa";
 import { IoMdSend } from "react-icons/io";
 import axiosInstance from "../../../axiosInstance";
-const user = localStorage.getItem("username");
+
+const user = localStorage.getItem("username") || 'Guest';
 
 const CommunityChat = () => {
   const [messages, setMessages] = useState([]);
@@ -12,9 +13,9 @@ const CommunityChat = () => {
   const [reportedItems, setReportedItems] = useState([]);
   const [activeTab, setActiveTab] = useState("chat");
 
-  // Get avatar or generate a default one based on username
+  // Get avatar with random background
   const getAvatar = (username) => {
-    return `https://ui-avatars.com/api/?name=${username}&background=random`;
+    return `https://ui-avatars.com/api/?name=${username}&background=random&color=fff&bold=true`;
   };
 
   // Fetch chat messages from the backend
@@ -22,7 +23,6 @@ const CommunityChat = () => {
     try {
       const response = await axiosInstance.get("community/messages");
       setMessages(response.data);
-      console.log(response.data);
     } catch (error) {
       console.error("Error fetching chat messages:", error);
       setMessages([]);
@@ -40,30 +40,27 @@ const CommunityChat = () => {
     }
   };
 
-
   useEffect(() => {
     fetchMessages();
     fetchReportedItems();
-    handleReportSubmit()
-    
     
     const interval = setInterval(fetchMessages, 2000);
-    const interval2= setInterval(fetchReportedItems, 2000)
-    return () => {clearInterval(interval),clearInterval(interval2);};
+    const interval2 = setInterval(fetchReportedItems, 2000);
     
+    return () => {
+      clearInterval(interval);
+      clearInterval(interval2);
+    };
   }, []);
-
 
   // Handle message send
   const sendMessage = async () => {
-    if (message.trim()) {
+    if (message) {
       const newMessage = {
-        _id: message.length + 1,
         text: message,
         createdAt: new Date().toISOString(),
         user: user
       };
-      console.log(newMessage);
       
       try {
         const response = await axiosInstance.post("community/messages", newMessage);
@@ -75,20 +72,17 @@ const CommunityChat = () => {
     }
   };
 
-
-
   // Handle report submission
   const handleReportSubmit = async (e) => {
     e.preventDefault();
-    if (report.trim()) {
+    if (report) {
       try {
-
         const newReport = {
-         report: report,
+          report: report,
           createdAt: new Date().toISOString(),
           username: user
         };
-        const response = await axiosInstance.post("reports", { newReport });
+        const response = await axiosInstance.post("reports", newReport);
         setReportedItems([...reportedItems, response.data]);
         setReport("");
       } catch (error) {
@@ -97,7 +91,9 @@ const CommunityChat = () => {
     }
   };
 
-  
+  // Count active users
+  const activeUsersCount = messages.length > 0 ? new Set(messages.map(m => m.username)).size : 0;
+
   return (
     <Container fluid style={{ 
       padding: "20px", 
@@ -109,7 +105,7 @@ const CommunityChat = () => {
         <Col lg={8} style={{ padding: 0 }}>
           <Card style={{ 
             height: "100%",
-            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
             borderRadius: "12px",
             border: "none"
           }}>
@@ -118,39 +114,58 @@ const CommunityChat = () => {
               justifyContent: "space-between",
               alignItems: "center",
               backgroundColor: "white",
-              border: "none",
-              padding: "15px 20px"
+              borderBottom: "1px solid rgba(0,0,0,0.05)",
+              padding: "20px"
             }}>
               <div style={{ display: "flex", alignItems: "center" }}>
-                <h4 style={{ marginBottom: 0 }}>
+                <h4 style={{ marginBottom: 0, fontWeight: "600" }}>
                   {activeTab === "chat" ? (
                     <>
-                      <FaComment style={{ marginRight: "8px", color: "#007bff" }} />
+                      <FaComment style={{ marginRight: "10px", color: "#4e73ff" }} />
                       Community Chat
                     </>
                   ) : (
                     <>
-                      <FaExclamationCircle style={{ marginRight: "8px", color: "#dc3545" }} />
+                      <FaExclamationCircle style={{ marginRight: "10px", color: "#e74a3b" }} />
                       Reported Issues
                     </>
                   )}
                 </h4>
-                <Badge bg="light" text="dark" style={{ marginLeft: "8px" }}>
-                  {activeTab === "chat" ? "mesages "+ messages.length + "  : "+ user.length+" Users": reportedItems.length}
+                <Badge pill bg="light" text="dark" style={{ 
+                  marginLeft: "12px",
+                  padding: "8px 12px",
+                  fontWeight: "500",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.05)"
+                }}>
+                  {activeTab === "chat" 
+                    ? `${messages.length} messages • ${activeUsersCount} users` 
+                    : `${reportedItems.length} reports`}
                 </Badge>
               </div>
               <div>
                 <Button 
                   variant={activeTab === "chat" ? "primary" : "outline-primary"} 
                   size="sm" 
-                  style={{ marginRight: "8px" }}
+                  style={{ 
+                    marginRight: "8px",
+                    borderRadius: "20px",
+                    padding: "6px 16px",
+                    fontWeight: "500",
+                    borderWidth: "2px"
+                  }}
                   onClick={() => setActiveTab("chat")}
                 >
                   Chat
                 </Button>
                 <Button 
-                  variant={activeTab === "reports" ? "primary" : "outline-primary"} 
+                  variant={activeTab === "reports" ? "danger" : "outline-danger"} 
                   size="sm"
+                  style={{ 
+                    borderRadius: "20px",
+                    padding: "6px 16px",
+                    fontWeight: "500",
+                    borderWidth: "2px"
+                  }}
                   onClick={() => setActiveTab("reports")}
                 >
                   Reports
@@ -162,20 +177,20 @@ const CommunityChat = () => {
               padding: 0,
               display: "flex",
               flexDirection: "column",
-              height: "calc(100% - 56px)"
+              height: "calc(100% - 72px)"
             }}>
               {/* Content Area */}
               <div style={{ 
                 flexGrow: 1,
                 overflow: "auto",
-                padding: "12px",
+                padding: "20px",
                 height: "400px"
               }}>
                 {activeTab === "chat" ? (
                   <div style={{ 
                     display: "flex",
                     flexDirection: "column",
-                    gap: "15px"
+                    gap: "20px"
                   }}>
                     {messages.length > 0 ? (
                       messages.map((msg, index) => (
@@ -183,46 +198,50 @@ const CommunityChat = () => {
                           display: "flex",
                           maxWidth: "80%",
                           alignSelf: msg.username === user ? "flex-end" : "flex-start",
-                          flexDirection: msg.username=== user ? "row-reverse" : "row"
+                          flexDirection: msg.username === user ? "row-reverse" : "row"
                         }}>
-                          <div style={{ margin: "0 10px" }}>
+                          <div style={{ margin: "0 12px" }}>
                             <img 
                               src={getAvatar(msg.username)} 
                               alt={msg.username} 
                               style={{
                                 borderRadius: "50%",
-                                width: "40px",
-                                height: "40px",
-                                objectFit: "cover"
+                                width: "44px",
+                                height: "44px",
+                                objectFit: "cover",
+                                boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
                               }}
                             />
                           </div>
                           <div style={{ 
                             display: "flex",
                             flexDirection: "column",
-                            alignItems: msg.username === user ? "flex-end" : "flex-start"
+                            alignItems: msg.username === user ? "flex-end" : "flex-start",
+                            maxWidth: "calc(100% - 68px)"
                           }}>
                             <div style={{ 
                               display: "flex",
                               alignItems: "center",
-                              marginBottom: "5px"
+                              marginBottom: "6px"
                             }}>
-                              <strong>{msg.username}</strong>
+                              <strong style={{ fontWeight: "500" }}>{msg.username === user ? "You" : msg.username}</strong>
                               <small style={{ 
                                 color: "#6c757d",
-                                marginLeft: "8px"
+                                marginLeft: "10px",
+                                fontSize: "0.8rem"
                               }}>
                                 {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                               </small>
                             </div>
                             <div style={{ 
-                              padding: "10px 15px",
+                              padding: "12px 16px",
                               borderRadius: "18px",
                               wordBreak: "break-word",
-                              backgroundColor: msg.username=== user ? "#007bff" : "#f1f1f1",
-                              color: msg.username === user ? "white" : "#333",
-                              borderTopRightRadius: msg.username === user ? 0 : "18px",
-                              borderTopLeftRadius: msg.username === user ? "18px" : 0
+                              backgroundColor: msg.username === user ? "#4e73ff" : "#f1f3f6",
+                              color: msg.username === user ? "white" : "#212529",
+                              boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                              borderTopRightRadius: msg.username === user ? "4px" : "18px",
+                              borderTopLeftRadius: msg.username === user ? "18px" : "4px"
                             }}>
                               {msg.text}
                             </div>
@@ -233,9 +252,11 @@ const CommunityChat = () => {
                       <div style={{ 
                         textAlign: "center",
                         color: "#6c757d",
-                        padding: "16px 0"
+                        padding: "40px 0"
                       }}>
-                        No messages found
+                        <FaComment size={32} style={{ opacity: 0.3, marginBottom: "12px" }} />
+                        <h5 style={{ fontWeight: "500" }}>No messages yet</h5>
+                        <p>Start the conversation!</p>
                       </div>
                     )}
                   </div>
@@ -244,10 +265,10 @@ const CommunityChat = () => {
                     {reportedItems.length > 0 ? (
                       reportedItems.map((item, index) => (
                         <ListGroup.Item key={index} style={{ 
-                          padding: "12px 0",
+                          padding: "16px 20px",
                           borderLeft: "none",
                           borderRight: "none",
-                          transition: "background-color 0.2s"
+                          borderBottom: "1px solid rgba(0,0,0,0.05)"
                         }}>
                           <div style={{ 
                             display: "flex",
@@ -255,12 +276,31 @@ const CommunityChat = () => {
                             alignItems: "flex-start"
                           }}>
                             <div>
-                              <p style={{ marginBottom: "4px" }}>{item.report}</p>
-                              <small style={{ color: "#6c757d" }}>
-                                Reported on {new Date(item.createdAt).toLocaleDateString()}
-                              </small>
+                              <p style={{ 
+                                marginBottom: "6px",
+                                fontWeight: "500"
+                              }}>{item.report}</p>
+                              <div style={{ display: "flex", alignItems: "center" }}>
+                                <small style={{ 
+                                  color: "#6c757d",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  marginRight: "12px"
+                                }}>
+                                  <FaUsers style={{ marginRight: "4px", fontSize: "0.8rem" }} />
+                                  {item.username}
+                                </small>
+                                <small style={{ color: "#6c757d" }}>
+                                  {new Date(item.createdAt).toLocaleDateString()}
+                                </small>
+                              </div>
                             </div>
-                           
+                            <Badge pill bg="warning" text="dark" style={{ 
+                              fontWeight: "500",
+                              padding: "6px 12px"
+                            }}>
+                              Pending
+                            </Badge>
                           </div>
                         </ListGroup.Item>
                       ))
@@ -268,9 +308,11 @@ const CommunityChat = () => {
                       <div style={{ 
                         textAlign: "center",
                         color: "#6c757d",
-                        padding: "16px 0"
+                        padding: "40px 0"
                       }}>
-                        No reports found
+                        <FaExclamationCircle size={32} style={{ opacity: 0.3, marginBottom: "12px" }} />
+                        <h5 style={{ fontWeight: "500" }}>No reports found</h5>
+                        <p>Be the first to report an issue</p>
                       </div>
                     )}
                   </ListGroup>
@@ -280,8 +322,9 @@ const CommunityChat = () => {
               {/* Input Area */}
               {activeTab === "chat" ? (
                 <div style={{ 
-                  padding: "12px",
-                  borderTop: "1px solid #dee2e6"
+                  padding: "16px 20px",
+                  borderTop: "1px solid rgba(0,0,0,0.05)",
+                  backgroundColor: "#f8f9fa"
                 }}>
                   <InputGroup>
                     <Form.Control
@@ -291,7 +334,11 @@ const CommunityChat = () => {
                       onChange={(e) => setMessage(e.target.value)}
                       placeholder="Type your message here..."
                       style={{ 
-                        resize: "none"
+                        resize: "none",
+                        borderRadius: "12px 0 0 12px",
+                        border: "1px solid rgba(0,0,0,0.1)",
+                        padding: "12px",
+                        fontSize: "0.95rem"
                       }}
                       onKeyPress={(e) => {
                         if (e.key === "Enter" && !e.shiftKey) {
@@ -303,20 +350,30 @@ const CommunityChat = () => {
                     <Button 
                       variant="primary" 
                       onClick={sendMessage}
-                      disabled={!message.trim()}
+                      disabled={!message}
+                      style={{ 
+                        borderRadius: "0 12px 12px 0",
+                        padding: "0 20px"
+                      }}
                     >
-                      <IoMdSend />
+                      <IoMdSend size={18} />
                     </Button>
                   </InputGroup>
                 </div>
               ) : (
                 <div style={{ 
-                  padding: "12px",
-                  borderTop: "1px solid #dee2e6"
+                  padding: "16px 20px",
+                  borderTop: "1px solid rgba(0,0,0,0.05)",
+                  backgroundColor: "#f8f9fa"
                 }}>
                   <Form onSubmit={handleReportSubmit}>
                     <Form.Group>
-                      <Form.Label>Report an Issue</Form.Label>
+                      <Form.Label style={{ 
+                        fontSize: "0.9rem",
+                        fontWeight: "500",
+                        marginBottom: "8px",
+                        color: "#495057"
+                      }}>Report an Issue</Form.Label>
                       <InputGroup>
                         <Form.Control
                           as="textarea"
@@ -324,14 +381,24 @@ const CommunityChat = () => {
                           value={report}
                           onChange={(e) => setReport(e.target.value)}
                           placeholder="Describe the issue you want to report..."
-                          style={{ resize: "none" }}
+                          style={{ 
+                            resize: "none",
+                            borderRadius: "12px 0 0 12px",
+                            border: "1px solid rgba(0,0,0,0.1)",
+                            padding: "12px",
+                            fontSize: "0.95rem"
+                          }}
                         />
                         <Button 
                           variant="danger" 
                           type="submit"
-                          disabled={!report.trim()}
+                          disabled={!report}
+                          style={{ 
+                            borderRadius: "0 12px 12px 0",
+                            padding: "0 20px"
+                          }}
                         >
-                          <FaExclamationCircle style={{ marginRight: "4px" }} />
+                          <FaExclamationCircle style={{ marginRight: "6px" }} />
                           Report
                         </Button>
                       </InputGroup>
@@ -346,69 +413,250 @@ const CommunityChat = () => {
         {/* Right Column - Community Info */}
         <Col lg={4} style={{ padding: 0 }}>
           <Card style={{ 
-            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
             borderRadius: "12px",
             border: "none",
             height: "100%"
           }}>
             <Card.Header style={{ 
               backgroundColor: "white",
-              border: "none",
-              padding: "15px 20px"
+              borderBottom: "1px solid rgba(0,0,0,0.05)",
+              padding: "20px"
             }}>
-              <h5>Community Guidelines</h5>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <FaInfoCircle style={{ 
+                  color: "#4e73ff", 
+                  fontSize: "1.5rem",
+                  marginRight: "12px"
+                }} />
+                <h4 style={{ 
+                  marginBottom: 0,
+                  fontWeight: "600"
+                }}>Community Hub</h4>
+              </div>
             </Card.Header>
-            <Card.Body>
-              <ListGroup variant="flush">
-                <ListGroup.Item style={{ 
+            <Card.Body style={{ padding: "20px" }}>
+              <div style={{ marginBottom: "24px" }}>
+                <div style={{ 
                   display: "flex",
                   alignItems: "flex-start",
-                  borderLeft: "none",
-                  borderRight: "none"
+                  marginBottom: "20px"
                 }}>
-                  <div style={{ 
-                    color: "#007bff",
-                    marginRight: "8px"
-                  }}>1.</div>
-                  <div>Be respectful to all community members</div>
-                </ListGroup.Item>
-                <ListGroup.Item style={{ 
+                  <div style={{
+                    width: "48px",
+                    height: "48px",
+                    borderRadius: "12px",
+                    backgroundColor: "rgba(78, 115, 255, 0.1)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginRight: "16px",
+                    flexShrink: 0
+                  }}>
+                    <FaUsers style={{ color: "#4e73ff", fontSize: "1.25rem" }} />
+                  </div>
+                  <div>
+                    <h5 style={{ 
+                      fontWeight: "600",
+                      marginBottom: "8px",
+                      fontSize: "1.1rem"
+                    }}>About This Community</h5>
+                    <p style={{ 
+                      color: "#6c757d",
+                      marginBottom: 0,
+                      fontSize: "0.9rem",
+                      lineHeight: "1.5"
+                    }}>
+                      Connect with neighbors to reunite lost items with their owners. 
+                      This platform helps our community work together to solve lost & found cases.
+                    </p>
+                  </div>
+                </div>
+
+                <div style={{ 
                   display: "flex",
                   alignItems: "flex-start",
-                  borderLeft: "none",
-                  borderRight: "none"
+                  marginBottom: "20px"
                 }}>
-                  <div style={{ 
-                    color: "#007bff",
-                    marginRight: "8px"
-                  }}>2.</div>
-                  <div>Keep discussions relevant to lost and found items</div>
-                </ListGroup.Item>
-                <ListGroup.Item style={{ 
+                  <div style={{
+                    width: "48px",
+                    height: "48px",
+                    borderRadius: "12px",
+                    backgroundColor: "rgba(78, 115, 255, 0.1)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginRight: "16px",
+                    flexShrink: 0
+                  }}>
+                    <FaRegLightbulb style={{ color: "#4e73ff", fontSize: "1.25rem" }} />
+                  </div>
+                  <div>
+                    <h5 style={{ 
+                      fontWeight: "600",
+                      marginBottom: "8px",
+                      fontSize: "1.1rem"
+                    }}>Quick Tips</h5>
+                    <p style={{ 
+                      color: "#6c757d",
+                      marginBottom: 0,
+                      fontSize: "0.9rem",
+                      lineHeight: "1.5"
+                    }}>
+                      Include specific details like locations, colors, and unique identifiers 
+                      when posting about lost items.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h5 style={{ 
+                  fontWeight: "600",
+                  marginBottom: "16px",
                   display: "flex",
-                  alignItems: "flex-start",
-                  borderLeft: "none",
-                  borderRight: "none"
+                  alignItems: "center"
                 }}>
-                  <div style={{ 
-                    color: "#007bff",
-                    marginRight: "8px"
-                  }}>3.</div>
-                  <div>Provide clear descriptions when reporting items</div>
-                </ListGroup.Item>
-                <ListGroup.Item style={{ 
+                  <FaExclamationCircle style={{ 
+                    color: "#e74a3b",
+                    marginRight: "12px",
+                    fontSize: "1.25rem"
+                  }} />
+                  Community Guidelines
+                </h5>
+                <ListGroup variant="flush">
+                  <ListGroup.Item style={{ 
+                    display: "flex",
+                    alignItems: "flex-start",
+                    borderLeft: "none",
+                    borderRight: "none",
+                    padding: "12px 0",
+                    backgroundColor: "transparent"
+                  }}>
+                    <div style={{ 
+                      color: "#4e73ff",
+                      fontWeight: "600",
+                      marginRight: "12px",
+                      fontSize: "1.1rem",
+                      width: "24px",
+                      textAlign: "center"
+                    }}>1.</div>
+                    <div>
+                      <div style={{ fontWeight: "500", marginBottom: "4px" }}>Be Respectful</div>
+                      <div style={{ 
+                        color: "#6c757d",
+                        fontSize: "0.9rem",
+                        lineHeight: "1.5"
+                      }}>Treat all members with kindness and respect in all interactions.</div>
+                    </div>
+                  </ListGroup.Item>
+                  <ListGroup.Item style={{ 
+                    display: "flex",
+                    alignItems: "flex-start",
+                    borderLeft: "none",
+                    borderRight: "none",
+                    padding: "12px 0",
+                    backgroundColor: "transparent"
+                  }}>
+                    <div style={{ 
+                      color: "#4e73ff",
+                      fontWeight: "600",
+                      marginRight: "12px",
+                      fontSize: "1.1rem",
+                      width: "24px",
+                      textAlign: "center"
+                    }}>2.</div>
+                    <div>
+                      <div style={{ fontWeight: "500", marginBottom: "4px" }}>Stay On Topic</div>
+                      <div style={{ 
+                        color: "#6c757d",
+                        fontSize: "0.9rem",
+                        lineHeight: "1.5"
+                      }}>Keep discussions relevant to lost and found items in our community.</div>
+                    </div>
+                  </ListGroup.Item>
+                  <ListGroup.Item style={{ 
+                    display: "flex",
+                    alignItems: "flex-start",
+                    borderLeft: "none",
+                    borderRight: "none",
+                    padding: "12px 0",
+                    backgroundColor: "transparent"
+                  }}>
+                    <div style={{ 
+                      color: "#4e73ff",
+                      fontWeight: "600",
+                      marginRight: "12px",
+                      fontSize: "1.1rem",
+                      width: "24px",
+                      textAlign: "center"
+                    }}>3.</div>
+                    <div>
+                      <div style={{ fontWeight: "500", marginBottom: "4px" }}>Provide Details</div>
+                      <div style={{ 
+                        color: "#6c757d",
+                        fontSize: "0.9rem",
+                        lineHeight: "1.5"
+                      }}>Include clear descriptions when reporting lost or found items.</div>
+                    </div>
+                  </ListGroup.Item>
+                  <ListGroup.Item style={{ 
+                    display: "flex",
+                    alignItems: "flex-start",
+                    borderLeft: "none",
+                    borderRight: "none",
+                    padding: "12px 0",
+                    backgroundColor: "transparent"
+                  }}>
+                    <div style={{ 
+                      color: "#4e73ff",
+                      fontWeight: "600",
+                      marginRight: "12px",
+                      fontSize: "1.1rem",
+                      width: "24px",
+                      textAlign: "center"
+                    }}>4.</div>
+                    <div>
+                      <div style={{ fontWeight: "500", marginBottom: "4px" }}>Privacy Matters</div>
+                      <div style={{ 
+                        color: "#6c757d",
+                        fontSize: "0.9rem",
+                        lineHeight: "1.5"
+                      }}>Use private messages for sensitive information and personal details.</div>
+                    </div>
+                  </ListGroup.Item>
+                </ListGroup>
+              </div>
+
+              <div style={{ 
+                backgroundColor: "rgba(78, 115, 255, 0.05)",
+                borderRadius: "12px",
+                padding: "16px",
+                marginTop: "24px"
+              }}>
+                <h6 style={{ 
+                  fontWeight: "600",
+                  marginBottom: "16px",
                   display: "flex",
-                  alignItems: "flex-start",
-                  borderLeft: "none",
-                  borderRight: "none"
+                  alignItems: "center",
+                  fontSize: "0.95rem"
                 }}>
-                  <div style={{ 
-                    color: "#007bff",
-                    marginRight: "8px"
-                  }}>4.</div>
-                  <div>Don't share personal information publicly</div>
-                </ListGroup.Item>
-              </ListGroup>
+                  <FaRegLightbulb style={{ marginRight: "8px", color: "#4e73ff" }} />
+                  Community Stats
+                </h6>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+                  <span style={{ color: "#6c757d", fontSize: "0.9rem" }}>Active Members</span>
+                  <span style={{ fontWeight: "500" }}>{activeUsersCount}</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+                  <span style={{ color: "#6c757d", fontSize: "0.9rem" }}>Total Messages</span>
+                  <span style={{ fontWeight: "500" }}>{messages.length}</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span style={{ color: "#6c757d", fontSize: "0.9rem" }}>Active Reports</span>
+                  <span style={{ fontWeight: "500" }}>{reportedItems.length}</span>
+                </div>
+              </div>
             </Card.Body>
           </Card>
         </Col>
