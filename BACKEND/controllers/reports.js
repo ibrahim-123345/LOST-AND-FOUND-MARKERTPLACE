@@ -28,8 +28,8 @@ const getReports = async(req, res) => {
 
 const createReportHandler = async(req, res) => {
 
-    const{newReport}=req.body;
-    const{report,createdAt,username}=newReport
+    
+    const{report,createdAt,username}=req.body;
     try{
 
         await Dbconnection()

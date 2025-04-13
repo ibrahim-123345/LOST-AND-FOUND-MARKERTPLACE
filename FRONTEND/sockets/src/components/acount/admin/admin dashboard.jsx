@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from "react";
 import {
   Container, Card, Button, Table, Tabs, Tab,
-  Row, Col, Image, Form, Modal
+  Row, Col, Image, Form, Modal, Badge
 } from "react-bootstrap";
 import {
-  FaUsers, FaBox, FaFlag, FaComments,
-  FaUserCog, FaEdit, FaKey, FaSignOutAlt,
-  FaUserCircle, FaTrash, FaBan, FaSearch
+  FaUsers, FaBox, FaUserCircle, FaTrash, FaBan, FaEdit, FaKey, FaSignOutAlt
 } from "react-icons/fa";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axiosInstance from "../../../axiosInstance";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const AdminDashboard = () => {
   const [key, setKey] = useState("users");
@@ -28,7 +26,6 @@ const AdminDashboard = () => {
     avatar: "",
     role: "Admin",
   });
-
   const [previewImage, setPreviewImage] = useState(null);
 
   const fetchAdminProfile = async () => {
@@ -136,9 +133,12 @@ const AdminDashboard = () => {
   };
 
   const renderEmptyState = (message) => (
-    <Card>
+    <Card className="border-0 shadow-sm">
       <Card.Body className="text-center py-5">
-        <p className="text-muted mb-0">{message}</p>
+        <div className="empty-state-icon mb-3">
+          <FaBox size={48} className="text-muted" />
+        </div>
+        <h5 className="text-muted mb-0">{message}</h5>
       </Card.Body>
     </Card>
   );
@@ -146,225 +146,548 @@ const AdminDashboard = () => {
   const getRoleBadge = (role) => {
     switch (role) {
       case "Admin":
-        return <span className="badge bg-primary">{role}</span>;
+        return <Badge bg="primary" className="px-3 py-2">{role}</Badge>;
       case "User":
-        return <span className="badge bg-success">{role}</span>;
+        return <Badge bg="success" className="px-3 py-2">{role}</Badge>;
       case "Moderator":
-        return <span className="badge bg-warning text-dark">{role}</span>;
+        return <Badge bg="warning" className="px-3 py-2 text-dark">{role}</Badge>;
       default:
-        return <span className="badge bg-secondary">{role}</span>;
+        return <Badge bg="secondary" className="px-3 py-2">{role}</Badge>;
     }
   };
 
   return (
-    <Container className="py-4">
-      <Card className="mb-4 border-0 shadow-sm">
-        <Card.Body className="p-4">
-          <Row className="align-items-center">
-            <Col md={2} className="text-center mb-3 mb-md-0">
-              {adminProfile.avatar ? (
-                <Image
-                  src={adminProfile.avatar}
-                  roundedCircle
-                  width={100}
-                  height={100}
-                  className="border object-fit-cover"
-                />
-              ) : (
-                <div className="d-flex justify-content-center align-items-center bg-light rounded-circle"
-                  style={{ width: 100, height: 100 }}>
-                  <FaUserCircle size={60} className="text-secondary" />
-                </div>
-              )}
-            </Col>
-            <Col md={6}>
-              <h3 className="mb-2">{adminProfile.name}</h3>
-              <p className="text-muted mb-1"><strong>Email:</strong> {adminProfile.email}</p>
-              <p className="text-muted"><strong>Role:</strong> {getRoleBadge(adminProfile.role)}</p>
-            </Col>
-            <Col md={4} className="d-flex flex-column flex-md-row justify-content-md-end gap-2">
-              <Button variant="outline-primary" onClick={() => setShowProfileModal(true)}><FaEdit className="me-1" /> Edit Profile</Button>
-              <Button variant="outline-secondary" onClick={() => setShowPasswordModal(true)}><FaKey className="me-1" /> Change Password</Button>
-              <Button as={Link} to="/logout" variant="outline-danger"><FaSignOutAlt className="me-1" /> Logout</Button>
-            </Col>
-          </Row>
-        </Card.Body>
-      </Card>
+    <div className="admin-dashboard" style={{ backgroundColor: "#f8f9fa" }}>
+      {/* Top Navigation */}
+      <div className="admin-topnav">
+        <div className="d-flex align-items-center">
+          <h4 className="mb-0">
+            {key === "users" && "User Management"}
+            {key === "foundItems" && "Found Items"}
+            {key === "lostItems" && "Lost Items"}
+          </h4>
+        </div>
+        
+        <div className="admin-profile-dropdown">
+          <div className="d-flex align-items-center">
+            {adminProfile.avatar ? (
+              <Image
+                src={adminProfile.avatar}
+                roundedCircle
+                width={40}
+                height={40}
+                className="border object-fit-cover me-2"
+              />
+            ) : (
+              <div className="d-flex justify-content-center align-items-center bg-light rounded-circle me-2"
+                style={{ width: 40, height: 40 }}>
+                <FaUserCircle size={24} className="text-secondary" />
+              </div>
+            )}
+            <div className="d-none d-md-block">
+              <div className="fw-medium">{adminProfile.name}</div>
+              <div className="small text-muted">{adminProfile.role}</div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      <h2 className="mb-3">Admin Dashboard</h2>
-      <Tabs activeKey={key} onSelect={(k) => setKey(k)} className="mb-3">
-        <Tab eventKey="users" title={<><FaUsers className="me-1" /> Users</>}>
-          {loading ? (
-            <div className="text-center py-5">Loading users...</div>
-          ) : users.length > 0 ? (
-            <Card className="border-0 shadow-sm">
-              <Card.Body>
-                <Table striped bordered hover responsive>
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Name</th>
-                      <th>Email</th>
-                      <th>Role</th>
-                      <th>Status</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {users.map((user, index) => (
-                      <tr key={user._id}>
-                        <td>{index + 1}</td>
-                        <td>{user.username}</td>
-                        <td>{user.email}</td>
-                        <td>{getRoleBadge(user.role)}</td>
-                        <td>{user.status || "Active"}</td>
-                        <td>
-                          {user.role === "Admin" ? (
-                            <span className="text-muted">Admin can't be deleted or blocked</span>
-                          ) : (
-                            <>
-                              <Button variant="danger" size="sm" className="me-2" onClick={() => handleDeleteUser(user._id)}>
-                                <FaTrash /> Delete
-                              </Button>
-                              <Button variant="warning" size="sm" onClick={() => alert(`Block user logic for user ID: ${user._id}`)}>
-                                <FaBan /> Block
-                              </Button>
-                            </>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              </Card.Body>
-            </Card>
-          ) : (
-            renderEmptyState("No users found.")
-          )}
-        </Tab>
+      {/* Dashboard Content */}
+      <div className="admin-main-content">
+        {/* Main Content Area */}
+        <Card className="border-0 shadow-sm">
+          <Card.Body className="p-0">
+            <Tabs 
+              activeKey={key} 
+              onSelect={(k) => setKey(k)} 
+              className="border-bottom-0 px-3 pt-3"
+            >
+              <Tab eventKey="users" title={<><FaUsers className="me-1" /> Users</>}>
+                {loading ? (
+                  <div className="text-center py-5">
+                    <div className="spinner-border text-primary" role="status">
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                  </div>
+                ) : users.length > 0 ? (
+                  <div className="table-responsive">
+                    <Table hover className="mb-0">
+                      <thead className="table-light">
+                        <tr>
+                          <th>#</th>
+                          <th>Name</th>
+                          <th>Email</th>
+                          <th>Role</th>
+                          <th>Status</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {users.map((user, index) => (
+                          <tr key={user._id}>
+                            <td>{index + 1}</td>
+                            <td>
+                              <div className="d-flex align-items-center">
+                                <div className="avatar-sm me-2">
+                                  {user.avatar ? (
+                                    <Image
+                                      src={user.avatar}
+                                      roundedCircle
+                                      width={36}
+                                      height={36}
+                                      className="border object-fit-cover"
+                                    />
+                                  ) : (
+                                    <div className="d-flex justify-content-center align-items-center bg-light rounded-circle"
+                                      style={{ width: 36, height: 36 }}>
+                                      <FaUserCircle size={20} className="text-secondary" />
+                                    </div>
+                                  )}
+                                </div>
+                                <span>{user.username}</span>
+                              </div>
+                            </td>
+                            <td>{user.email}</td>
+                            <td>{getRoleBadge(user.role)}</td>
+                            <td>
+                              <Badge bg={user.status === "Active" ? "success" : "danger"}>
+                                {user.status || "Active"}
+                              </Badge>
+                            </td>
+                            <td>
+                              {user.role === "Admin" ? (
+                                <span className="text-muted">Admin privileges</span>
+                              ) : (
+                                <div className="d-flex">
+                                  <Button 
+                                    variant="outline-danger" 
+                                    size="sm" 
+                                    className="me-2" 
+                                    onClick={() => handleDeleteUser(user._id)}
+                                  >
+                                    <FaTrash />
+                                  </Button>
+                                  <Button 
+                                    variant="outline-warning" 
+                                    size="sm"
+                                    onClick={() => alert(`Block user logic for user ID: ${user._id}`)}
+                                  >
+                                    <FaBan />
+                                  </Button>
+                                </div>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
+                  </div>
+                ) : (
+                  renderEmptyState("No users found.")
+                )}
+              </Tab>
 
-        <Tab eventKey="foundItems" title={<><FaBox className="me-1" /> Found Items</>}>
-          {loading ? (
-            <div className="text-center py-5">Loading found items...</div>
-          ) : foundItems.length > 0 ? (
-            <Card className="border-0 shadow-sm">
-              <Card.Body>
-                <Table striped bordered hover responsive>
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Image</th>
-                      <th>Item Name</th>
-                      <th>Description</th>
-                      <th>Location Found</th>
-                      <th>Status</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {foundItems.map((item, index) => (
-                      <tr key={item._id}>
-                        <td>{index + 1}</td>
-                        <td>
-                          {item.image ? (
-                            <Image
-                              src={item.image}
-                              width={60}
-                              height={60}
-                              rounded
-                              style={{ cursor: "pointer", objectFit: "cover" }}
-                              onClick={() => setPreviewImage(item.image)}
-                            />
-                          ) : <span className="text-muted">No image</span>}
-                        </td>
-                        <td>{item.name}</td>
-                        <td>{item.description}</td>
-                        <td>{item.location}</td>
-                        <td>{item.status || "Available"}</td>
-                        <td>
-                          <Button variant="danger" size="sm" className="me-2" onClick={() => handleDeleteFoundItem(item._id)}>
-                            <FaTrash /> Delete
-                          </Button>
-                          <Button variant="warning" size="sm" onClick={() => alert(`Block found item logic for item ID: ${item._id}`)}>
-                            <FaBan /> Block
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              </Card.Body>
-            </Card>
-          ) : (
-            renderEmptyState("No found items available.")
-          )}
-        </Tab>
+              <Tab eventKey="foundItems" title={<><FaBox className="me-1" /> Found Items</>}>
+                {loading ? (
+                  <div className="text-center py-5">
+                    <div className="spinner-border text-primary" role="status">
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                  </div>
+                ) : foundItems.length > 0 ? (
+                  <div className="table-responsive">
+                    <Table hover className="mb-0">
+                      <thead className="table-light">
+                        <tr>
+                          <th>#</th>
+                          <th>Image</th>
+                          <th>Item Name</th>
+                          <th>Description</th>
+                          <th>Location Found</th>
+                          <th>Status</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {foundItems.map((item, index) => (
+                          <tr key={item._id}>
+                            <td>{index + 1}</td>
+                            <td>
+                              {item.image ? (
+                                <Image
+                                  src={item.image}
+                                  width={60}
+                                  height={60}
+                                  rounded
+                                  style={{ cursor: "pointer", objectFit: "cover" }}
+                                  onClick={() => setPreviewImage(item.image)}
+                                  className="shadow-sm"
+                                />
+                              ) : <span className="text-muted">No image</span>}
+                            </td>
+                            <td className="fw-medium">{item.name}</td>
+                            <td>
+                              <div className="text-truncate" style={{ maxWidth: "200px" }}>
+                                {item.description}
+                              </div>
+                            </td>
+                            <td>{item.location}</td>
+                            <td>
+                              <Badge bg={item.status === "Available" ? "success" : "warning"}>
+                                {item.status || "Available"}
+                              </Badge>
+                            </td>
+                            <td>
+                              <div className="d-flex">
+                                <Button 
+                                  variant="outline-danger" 
+                                  size="sm" 
+                                  className="me-2" 
+                                  onClick={() => handleDeleteFoundItem(item._id)}
+                                >
+                                  <FaTrash />
+                                </Button>
+                                <Button 
+                                  variant="outline-warning" 
+                                  size="sm"
+                                  onClick={() => alert(`Block found item logic for item ID: ${item._id}`)}
+                                >
+                                  <FaBan />
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
+                  </div>
+                ) : (
+                  renderEmptyState("No found items available.")
+                )}
+              </Tab>
 
-        <Tab eventKey="lostItems" title={<><FaBox className="me-1" /> Lost Items</>}>
-          {loading ? (
-            <div className="text-center py-5">Loading lost items...</div>
-          ) : lostItems.length > 0 ? (
-            <Card className="border-0 shadow-sm">
-              <Card.Body>
-                <Table striped bordered hover responsive>
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Image</th>
-                      <th>Item Name</th>
-                      <th>Description</th>
-                      <th>Location Lost</th>
-                      <th>Status</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {lostItems.map((item, index) => (
-                      <tr key={item._id}>
-                        <td>{index + 1}</td>
-                        <td>
-                          {item.image ? (
-                            <Image
-                              src={item.image}
-                              width={60}
-                              height={60}
-                              rounded
-                              style={{ cursor: "pointer", objectFit: "cover" }}
-                              onClick={() => setPreviewImage(item.image)}
-                            />
-                          ) : <span className="text-muted">No image</span>}
-                        </td>
-                        <td>{item.name}</td>
-                        <td>{item.description}</td>
-                        <td>{item.location}</td>
-                        <td>{item.status || "Missing"}</td>
-                        <td>
-                          <Button variant="danger" size="sm" className="me-2" onClick={() => handleDeleteLostItem(item._id)}>
-                            <FaTrash /> Delete
-                          </Button>
-                          <Button variant="warning" size="sm" onClick={() => alert(`Block lost item logic for item ID: ${item._id}`)}>
-                            <FaBan /> Block
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              </Card.Body>
-            </Card>
-          ) : (
-            renderEmptyState("No lost items available.")
-          )}
-        </Tab>
-      </Tabs>
+              <Tab eventKey="lostItems" title={<><FaBox className="me-1" /> Lost Items</>}>
+                {loading ? (
+                  <div className="text-center py-5">
+                    <div className="spinner-border text-primary" role="status">
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                  </div>
+                ) : lostItems.length > 0 ? (
+                  <div className="table-responsive">
+                    <Table hover className="mb-0">
+                      <thead className="table-light">
+                        <tr>
+                          <th>#</th>
+                          <th>Image</th>
+                          <th>Item Name</th>
+                          <th>Description</th>
+                          <th>Location Lost</th>
+                          <th>Status</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {lostItems.map((item, index) => (
+                          <tr key={item._id}>
+                            <td>{index + 1}</td>
+                            <td>
+                              {item.image ? (
+                                <Image
+                                  src={item.image}
+                                  width={60}
+                                  height={60}
+                                  rounded
+                                  style={{ cursor: "pointer", objectFit: "cover" }}
+                                  onClick={() => setPreviewImage(item.image)}
+                                  className="shadow-sm"
+                                />
+                              ) : <span className="text-muted">No image</span>}
+                            </td>
+                            <td className="fw-medium">{item.name}</td>
+                            <td>
+                              <div className="text-truncate" style={{ maxWidth: "200px" }}>
+                                {item.description}
+                              </div>
+                            </td>
+                            <td>{item.location}</td>
+                            <td>
+                              <Badge bg={item.status === "Missing" ? "danger" : "success"}>
+                                {item.status || "Missing"}
+                              </Badge>
+                            </td>
+                            <td>
+                              <div className="d-flex">
+                                <Button 
+                                  variant="outline-danger" 
+                                  size="sm" 
+                                  className="me-2" 
+                                  onClick={() => handleDeleteLostItem(item._id)}
+                                >
+                                  <FaTrash />
+                                </Button>
+                                <Button 
+                                  variant="outline-warning" 
+                                  size="sm"
+                                  onClick={() => alert(`Block lost item logic for item ID: ${item._id}`)}
+                                >
+                                  <FaBan />
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
+                  </div>
+                ) : (
+                  renderEmptyState("No lost items available.")
+                )}
+              </Tab>
+            </Tabs>
+          </Card.Body>
+        </Card>
+      </div>
 
       {/* Image Preview Modal */}
       <Modal show={!!previewImage} onHide={() => setPreviewImage(null)} centered size="lg">
-        <Modal.Body className="p-0">
-          <Image src={previewImage} fluid style={{ width: "100%", objectFit: "contain" }} />
+        <Modal.Header closeButton>
+          <Modal.Title>Image Preview</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="p-0 d-flex justify-content-center align-items-center" style={{ minHeight: "400px" }}>
+          <Image src={previewImage} fluid style={{ maxHeight: "70vh", objectFit: "contain" }} />
         </Modal.Body>
       </Modal>
-    </Container>
+
+      {/* Profile Modal */}
+      <Modal show={showProfileModal} onHide={() => setShowProfileModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Profile</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form onSubmit={handleProfileUpdate}>
+            <div className="text-center mb-4">
+              <div className="avatar-upload mb-3">
+                {avatarPreview ? (
+                  <Image
+                    src={avatarPreview}
+                    roundedCircle
+                    width={120}
+                    height={120}
+                    className="border object-fit-cover"
+                  />
+                ) : adminProfile.avatar ? (
+                  <Image
+                    src={adminProfile.avatar}
+                    roundedCircle
+                    width={120}
+                    height={120}
+                    className="border object-fit-cover"
+                  />
+                ) : (
+                  <div className="d-flex justify-content-center align-items-center bg-light rounded-circle mx-auto"
+                    style={{ width: 120, height: 120 }}>
+                    <FaUserCircle size={60} className="text-secondary" />
+                  </div>
+                )}
+              </div>
+              <div>
+                <input
+                  type="file"
+                  id="avatar-upload"
+                  className="d-none"
+                  onChange={handleAvatarChange}
+                  accept="image/*"
+                />
+                <label htmlFor="avatar-upload" className="btn btn-outline-primary">
+                  Change Avatar
+                </label>
+              </div>
+            </div>
+            
+            <Form.Group className="mb-3">
+              <Form.Label>Name</Form.Label>
+              <Form.Control
+                type="text"
+                value={adminProfile.name}
+                onChange={(e) => setAdminProfile({...adminProfile, name: e.target.value})}
+              />
+            </Form.Group>
+            
+            <Form.Group className="mb-3">
+              <Form.Label>Email</Form.Label>
+              <Form.Control
+                type="email"
+                value={adminProfile.email}
+                onChange={(e) => setAdminProfile({...adminProfile, email: e.target.value})}
+              />
+            </Form.Group>
+            
+            <div className="d-flex justify-content-end">
+              <Button variant="secondary" className="me-2" onClick={() => setShowProfileModal(false)}>
+                Cancel
+              </Button>
+              <Button variant="primary" type="submit">
+                Save Changes
+              </Button>
+            </div>
+          </Form>
+        </Modal.Body>
+      </Modal>
+
+      {/* Password Modal */}
+      <Modal show={showPasswordModal} onHide={() => setShowPasswordModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Change Password</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group className="mb-3">
+              <Form.Label>Current Password</Form.Label>
+              <Form.Control type="password" placeholder="Enter current password" />
+            </Form.Group>
+            
+            <Form.Group className="mb-3">
+              <Form.Label>New Password</Form.Label>
+              <Form.Control type="password" placeholder="Enter new password" />
+            </Form.Group>
+            
+            <Form.Group className="mb-3">
+              <Form.Label>Confirm New Password</Form.Label>
+              <Form.Control type="password" placeholder="Confirm new password" />
+            </Form.Group>
+            
+            <div className="d-flex justify-content-end">
+              <Button variant="secondary" className="me-2" onClick={() => setShowPasswordModal(false)}>
+                Cancel
+              </Button>
+              <Button variant="primary">
+                Update Password
+              </Button>
+            </div>
+          </Form>
+        </Modal.Body>
+      </Modal>
+
+      {/* Add CSS */}
+      <style>{`
+        .admin-dashboard {
+          display: flex;
+          min-height: 100vh;
+          flex-direction: column;
+        }
+        
+        .admin-topnav {
+          padding: 20px 30px;
+          background: white;
+          box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          position: sticky;
+          top: 0;
+          z-index: 100;
+        }
+        
+        .admin-main-content {
+          padding: 30px;
+          flex: 1;
+        }
+        
+        .table th {
+          font-weight: 600;
+          text-transform: uppercase;
+          font-size: 0.75rem;
+          letter-spacing: 0.5px;
+          color: #6c757d;
+          background-color: #f8f9fa;
+          border-bottom-width: 1px;
+        }
+        
+        .table td {
+          vertical-align: middle;
+          border-bottom: 1px solid #f1f1f1;
+        }
+        
+        .table tr:hover td {
+          background-color: #f9f9f9;
+        }
+        
+        .avatar-upload {
+          position: relative;
+        }
+        
+        .avatar-upload label {
+          cursor: pointer;
+        }
+        
+        .empty-state-icon {
+          opacity: 0.5;
+        }
+        
+        .nav-tabs .nav-link {
+          border: none;
+          padding: 12px 20px;
+          color: #6c757d;
+          font-weight: 500;
+          transition: all 0.2s;
+        }
+        
+        .nav-tabs .nav-link:hover {
+          color: #0d6efd;
+        }
+        
+        .nav-tabs .nav-link.active {
+          color: #0d6efd;
+          border-bottom: 3px solid #0d6efd;
+          background: transparent;
+        }
+        
+        .badge {
+          font-weight: 500;
+          padding: 5px 10px;
+          letter-spacing: 0.5px;
+        }
+        
+        .card {
+          border-radius: 10px;
+          overflow: hidden;
+          border: none;
+          box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .btn-outline-danger {
+          border-color: #dc3545;
+          color: #dc3545;
+        }
+        
+        .btn-outline-danger:hover {
+          background-color: #dc3545;
+          color: white;
+        }
+        
+        .btn-outline-warning {
+          border-color: #ffc107;
+          color: #ffc107;
+        }
+        
+        .btn-outline-warning:hover {
+          background-color: #ffc107;
+          color: #212529;
+        }
+        
+        .admin-profile-dropdown {
+          cursor: pointer;
+          padding: 8px 12px;
+          border-radius: 8px;
+          transition: all 0.2s;
+        }
+        
+        .admin-profile-dropdown:hover {
+          background-color: #f8f9fa;
+        }
+      `}</style>
+    </div>
   );
 };
 
