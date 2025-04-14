@@ -31,6 +31,7 @@ const { getMessages, sendMessage } = require('./controllers/communityChat');
 const{upload}=require('./controllers/imagehandler')
 
 const { verfyToken } = require("./middlewares/virifyToken");
+const{checkingStatus}=require("./middlewares/checkingBlockedUser")
 const{checkRoles}=require('./middlewares/checkRoles')
 const { chatController ,postChatController} = require("./controllers/chatController");
 const { getReports ,createReportHandler} = require("./controllers/reports");
@@ -56,49 +57,49 @@ app.get("/", verfyToken, (req, res) => {
 
 app.post("/auth/createUser", registerController);
 
-app.post("/auth/login", checkUser, loginController);
-app.post("/userToken", verfyToken, UserToken);
+app.post("/auth/login",checkUser, loginController);
+app.post("/userToken",verfyToken, checkingStatus, UserToken);
 app.delete("/user/delete/:id", verfyToken,checkRoles(["Admin"]), deleteUser);
-app.patch("/user/update/:id", verfyToken,checkRoles(["Admin","User"]), userUpdate);
-app.post("/password/reset", verfyToken,checkRoles(["Admin","User"]) ,passwordReset);
-app.get("/user/getuserBasedonToken",verfyToken,checkRoles(["Admin","User"]),userBasedonToken)
+app.patch("/user/update/:id",verfyToken, checkingStatus,checkRoles(["Admin","User"]), userUpdate);
+app.post("/password/reset",verfyToken, checkingStatus,checkRoles(["Admin","User"]) ,passwordReset);
+app.get("/user/getuserBasedonToken",verfyToken, checkingStatus,checkRoles(["Admin","User"]),userBasedonToken)
 app.get("/user/Getuser",verfyToken,checkRoles(["Admin"]),FindRegisteredUsers)
 
 
 
 //lost item crud
-app.get("/lostItems",verfyToken,checkRoles(["Admin","User"]),lostItem);//this endpoint have limit
+app.get("/lostItems",verfyToken, checkingStatus,checkRoles(["Admin","User"]),lostItem);//this endpoint have limit
 
-app.get("/lostItem/:id",verfyToken,checkRoles(["Admin","User"]),lostItemId);//this endpoint to specific based input id
+app.get("/lostItem/:id",verfyToken, checkingStatus,checkRoles(["Admin","User"]),lostItemId);//this endpoint to specific based input id
 
-app.get("/lostItem",verfyToken,lostItems);//this endpoint have no limit it displays all losts item reported
+app.get("/lostItem",verfyToken, checkingStatus,lostItems);//this endpoint have no limit it displays all losts item reported
 
-app.post("/post/lostItem",verfyToken,checkRoles(["Admin","User"]),upload.single('image') ,lostItemController);
+app.post("/post/lostItem",verfyToken, checkingStatus,checkRoles(["Admin","User"]),upload.single('image') ,lostItemController);
 
-app.delete("/lost/delete/:id",checkRoles(["Admin","User"]), deleteLostItem);
+app.delete("/lost/delete/:id",verfyToken, checkingStatus,checkRoles(["Admin","User"]), deleteLostItem);
 
-app.patch("/lost/update/:id",checkRoles(["Admin","User"]), LostItemUpddate);
-app.get("/lostItemsByUser/:id",verfyToken,checkRoles(["Admin","User"]),itemLostByUser)
+app.patch("/lost/update/:id",verfyToken,checkingStatus,checkRoles(["Admin","User"]), LostItemUpddate);
+app.get("/lostItemsByUser/:id",checkingStatus,verfyToken,checkRoles(["Admin","User"]),itemLostByUser)
 
 
 
 //found items crud
 
-app.post("/foundItems",verfyToken,checkRoles(["Admin","User"]),upload.single('image'), foundItemController);
-app.get("/foundItems", foundItems);
+app.post("/foundItems",verfyToken,checkingStatus,checkRoles(["Admin","User"]),upload.single('image'), foundItemController);
+app.get("/foundItems",checkingStatus,checkingStatus, foundItems);
 app.get("/foundItem",foundItemLimit);
-app.get("/foundItemsByUser/:id",verfyToken,checkRoles(["Admin","User"]),itemFoundByUser)
+app.get("/foundItemsByUser/:id",verfyToken,checkingStatus,checkRoles(["Admin","User"]),itemFoundByUser)
 
 
 
-app.get("/foundone/:id", verfyToken,checkRoles(["Admin","User"]),singleFound);
+app.get("/foundone/:id",verfyToken,checkingStatus,checkRoles(["Admin","User"]),singleFound);
 
-app.delete("/found/delete/:id",verfyToken,checkRoles(["Admin","User"]), deleteFound);
+app.delete("/found/delete/:id",verfyToken,checkingStatus,checkRoles(["Admin","User"]), deleteFound);
 
-app.patch("/found/update/:id", verfyToken,checkRoles(["Admin","User"]),foundItemUpdate);
+app.patch("/found/update/:id",verfyToken,checkingStatus,checkRoles(["Admin","User"]),foundItemUpdate);
 
-app.post("/post/chats",verfyToken,checkRoles(["Admin","User"]), postChatController);
-app.get("/User/chats",verfyToken,checkRoles(["Admin","User"]), chatController);
+app.post("/post/chats",verfyToken,checkingStatus,checkRoles(["Admin","User"]), postChatController);
+app.get("/User/chats",verfyToken,checkingStatus,checkRoles(["Admin","User"]), chatController);
 
 
 

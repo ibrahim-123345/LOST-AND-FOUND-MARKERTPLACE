@@ -12,6 +12,7 @@ const CommunityChat = () => {
   const [report, setReport] = useState("");
   const [reportedItems, setReportedItems] = useState([]);
   const [activeTab, setActiveTab] = useState("chat");
+  const [id ,setId]= useState(0)
 
   // Get avatar with random background
   const getAvatar = (username) => {
@@ -57,6 +58,7 @@ const CommunityChat = () => {
   const sendMessage = async () => {
     if (message) {
       const newMessage = {
+        chatid:setId(id++),
         text: message,
         createdAt: new Date().toISOString(),
         user: user
