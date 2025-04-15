@@ -18,6 +18,7 @@ import AdminDashboard from './components/acount/admin/admin dashboard';
 import UserDashboard from './components/acount/user/account';
 import LostItemUpload from './components/lostitems/lostItemUpload'; 
 import BlockedPage from './blockedPage';
+import Register from './components/login/registeringUser';
 
 // Authentication functions
 const isAuthenticated = () => localStorage.getItem("token") !== null;
@@ -53,6 +54,7 @@ const App = () => {
         {/* Public Routes */}
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginRedirect />} />
+        <Route path="/register" element={<Register/>} />
 
         {/* Protected Routes */}
         <Route path="/lost-itemsPost" element={<ProtectedRoute element={<LostItemUpload />} allowedRoles={['User', 'Admin']} />} />

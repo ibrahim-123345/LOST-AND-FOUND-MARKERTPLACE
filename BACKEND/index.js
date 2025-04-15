@@ -1,5 +1,5 @@
 const express = require("express");
-const { checkUser } = require("./middlewares/checkUser");
+const { checkUser, checkUserForRegistration } = require("./middlewares/checkUser");
 const dotenv = require("dotenv");
 const cors=require('cors')
 const path = require('path');
@@ -55,7 +55,7 @@ app.get("/", verfyToken, (req, res) => {
   );
 });
 
-app.post("/auth/createUser", registerController);
+app.post("/auth/createUser", checkUserForRegistration,registerController);
 
 app.post("/auth/login",checkUser, loginController);
 app.post("/userToken",verfyToken, checkingStatus, UserToken);

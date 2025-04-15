@@ -7,7 +7,7 @@ const foundItemLimit = async (req, res) => {
     await Dbconnection();
     const items = await FoundItem.find().limit(4).sort({ createdAt: -1 });
     res.status(200).json(items);
-    console.log(items); // Send the list of lost items with image URLs
+  
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Server Error" });
