@@ -1,25 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import axios from "axios";
-import { Container } from "react-bootstrap";
-import { FaHome, FaUser, FaSignOutAlt } from "react-icons/fa";
+import { Container, Button } from "react-bootstrap";
+import { FaArrowLeft } from "react-icons/fa";
+import { IoMdChatboxes } from "react-icons/io";
 import "bootstrap/dist/css/bootstrap.min.css";
 import moment from "moment";
-import useThemeStore from "../store/colorStore"; 
+import useThemeStore from "../store/colorStore";
 import axiosInstance from "../../axiosInstance";
-
 
 const LostItemDetails = () => {
   const { id } = useParams();
   const [item, setItem] = useState(null);
-
-  // Accessing the theme state from the Zustand store
-  const { isDarkMode, toggleTheme } = useThemeStore();
-
-  const HandleLogout = () => {
-    localStorage.removeItem("token");
-    window.location.reload();
-  };
+  const { isDarkMode } = useThemeStore();
 
   useEffect(() => {
     const fetchItem = async () => {
@@ -34,90 +26,149 @@ const LostItemDetails = () => {
   }, [id]);
 
   useEffect(() => {
-    // Update the entire body's background color based on theme
-    document.body.style.backgroundColor = isDarkMode ? "#333" : "#f5f5f5";
-  }, [isDarkMode]); // Runs every time the theme changes
+    document.body.style.backgroundColor = isDarkMode ? "#1a1a1a" : "#f8f9fa";
+  }, [isDarkMode]);
 
   if (!item) {
-    return <p className="text-center mt-5">Loading item details...</p>;
+    return (
+      <div className="d-flex justify-content-center align-items-center vh-100">
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <>
-      <Container
-        className="mt-5 p-4"
-        style={{
-          maxWidth: "800px",
-          margin: "auto",
-          boxShadow: "0px 4px 15px rgba(0,0,0,0.2)",
-          borderRadius: "10px",
-          background: isDarkMode ? "#444" : "#ffffff", // Adjust background of the card
-          color: isDarkMode ? "#f5f5f5" : "#333", // Adjust text color for contrast
-          lineHeight: "1.8",
-        }}
-      >
-        <img
-          src={item.image || "https://via.placeholder.com/800"}
-          alt="Lost Item"
-          style={{
-            width: "100%",
-            maxHeight: "400px",
-            objectFit: "cover",
-            borderRadius: "10px",
-            marginBottom: "15px",
-          }}
-        />
-        <h2 style={{ fontWeight: "bold" }}>{item.name}</h2>
-        <p>{moment(item.dateLost).fromNow() + " ago" || "Unknown Date"}</p>
-        <hr />
-        <p style={{ fontSize: "1.1rem" }}>
-          <strong>Description:</strong> {item.description}
-        </p>
-        <p style={{ fontSize: "1.1rem" }}>
-          <strong>Contact Founder:</strong>
-          <a
-            href="https://contact-owner.example.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: "#007bff", textDecoration: "underline", marginLeft: "5px" }}
-          >
-            ....
-          </a>
-        </p>
-      </Container>
-
-      {/* Bottom Navigation Bar */}
-      <nav
-        style={{
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          width: "100%",
-          background: isDarkMode ? "#444" : "#343a40", // Adjust nav bar background based on theme
-          padding: "10px 0",
-          display: "flex",
-          justifyContent: "space-around",
-          alignItems: "center",
-          boxShadow: "0px -2px 10px rgba(0,0,0,0.2)",
-          zIndex: 1000,
-        }}
-      >
-        <Link to="/" style={{ color: "white", textDecoration: "none" }}>
-          <FaHome size={24} />
-        </Link>
-        <Link to="/account" style={{ color: "white", textDecoration: "none" }}>
-          <FaUser size={24} />
-        </Link>
+    <Container
+      className="py-4"
+      style={{
+        maxWidth: "800px",
+        margin: "auto",
+      }}
+    >
+      {/* Simple back button */}
+      <div className="mb-4">
         <Link
-          to="/logout"
-         
-          style={{ color: "white", textDecoration: "none" }}
+          to="/"
+          className="d-flex align-items-center text-decoration-none"
+          style={{ color: isDarkMode ? "#f5f5f5" : "#333" }}
         >
-          <FaSignOutAlt size={24} />
+          <FaArrowLeft className="me-2" />
+          <span>Back to Home</span>
         </Link>
-      
-      </nav>
-    </>
+      </div>
+
+      {/* Item Card */}
+      <div
+        style={{
+          borderRadius: "12px",
+          overflow: "hidden",
+          boxShadow: isDarkMode
+            ? "0 10px 20px rgba(0, 0, 0, 0.3)"
+            : "0 10px 20px rgba(0, 0, 0, 0.1)",
+          background: isDarkMode ? "#2d2d2d" : "#ffffff",
+          color: isDarkMode ? "#f5f5f5" : "#333",
+          transition: "all 0.3s ease",
+        }}
+      >
+        {/* Item Image */}
+        <div
+          style={{
+            height: "400px",
+            overflow: "hidden",
+            position: "relative",
+          }}
+        >
+          <img
+            src={item.image}
+            alt="Found Item"
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+            }}
+          />
+        </div>
+
+        {/* Item Details */}
+        <div className="p-4">
+          <div className="d-flex justify-content-between align-items-start mb-3">
+            <div>
+              <h2
+                style={{
+                  fontWeight: "700",
+                  marginBottom: "0.5rem",
+                  color: isDarkMode ? "#ffffff" : "#212529",
+                }}
+              >
+                {item.name}
+              </h2>
+              <p
+                style={{
+                  color: isDarkMode ? "#adb5bd" : "#6c757d",
+                  fontSize: "0.9rem",
+                }}
+              >
+                {moment(item.dateFound).fromNow()}
+              </p>
+            </div>
+            <Button
+              variant={isDarkMode ? "outline-light" : "outline-primary"}
+              className="d-flex align-items-center"
+              as={Link}
+              to="/"  // Changed to point to home page
+            >
+              <IoMdChatboxes className="me-2" />
+              Chat
+            </Button>
+          </div>
+
+          <hr style={{ borderColor: isDarkMode ? "#495057" : "#e9ecef" }} />
+
+          <div className="mb-4">
+            <h5
+              style={{
+                fontWeight: "600",
+                marginBottom: "1rem",
+                color: isDarkMode ? "#f8f9fa" : "#343a40",
+              }}
+            >
+              Description
+            </h5>
+            <p
+              style={{
+                fontSize: "1.05rem",
+                lineHeight: "1.7",
+                color: isDarkMode ? "#e9ecef" : "#495057",
+              }}
+            >
+              {item.description}
+            </p>
+          </div>
+
+          <div className="mb-3">
+            <h5
+              style={{
+                fontWeight: "600",
+                marginBottom: "1rem",
+                color: isDarkMode ? "#f8f9fa" : "#343a40",
+              }}
+            >
+              Found Location
+            </h5>
+            <p
+              style={{
+                fontSize: "1.05rem",
+                color: isDarkMode ? "#e9ecef" : "#495057",
+              }}
+            >
+              {item.location || "Not specified"}
+            </p>
+          </div>
+        </div>
+      </div>
+    </Container>
   );
 };
 

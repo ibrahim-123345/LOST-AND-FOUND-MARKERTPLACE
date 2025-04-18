@@ -28,6 +28,7 @@ const foundItemController = async (req, res) => {
   try {
     const { name, description, dateFound, location, contactInfo, user } =
       req.body;
+      //console.log(req.body)
     const image = req.file
       ? `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`
       : null;

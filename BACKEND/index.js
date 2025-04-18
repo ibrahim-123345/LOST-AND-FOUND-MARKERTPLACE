@@ -40,7 +40,7 @@ const { getReports ,createReportHandler} = require("./controllers/reports");
 
 
 const app = express();
-app.use(cors())
+app.use(cors({origin:'http://localhost:5173'}))
 const port = process.env.PORT ||7000;
 
 // Middleware
@@ -55,7 +55,7 @@ app.get("/", verfyToken, (req, res) => {
   );
 });
 
-app.post("/auth/createUser", checkUserForRegistration,registerController);
+app.post("/auth/createUser",upload.single('Image'),checkUserForRegistration,registerController);
 
 app.post("/auth/login",checkUser, loginController);
 app.post("/userToken",verfyToken, checkingStatus, UserToken);
@@ -92,7 +92,7 @@ app.get("/foundItemsByUser/:id",verfyToken,checkingStatus,checkRoles(["Admin","U
 
 
 
-app.get("/foundone/:id",verfyToken,checkingStatus,checkRoles(["Admin","User"]),singleFound);
+app.get("/foundone/:id",verfyToken,checkRoles(["Admin","User"]),singleFound);
 
 app.delete("/found/delete/:id",verfyToken,checkingStatus,checkRoles(["Admin","User"]), deleteFound);
 

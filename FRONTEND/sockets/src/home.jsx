@@ -151,7 +151,7 @@ const HomePage = () => {
           <div className="hero-content">
             <h1>Reuniting People With Their Lost Belongings</h1>
             <p className="lead">
-              Our platform helps you find lost items and report found ones with ease
+              Our platform helps you find lost items and report found ones with ease With Just a Push of Button
             </p>
             
             <div className="hero-actions">
@@ -178,7 +178,7 @@ const HomePage = () => {
           <section className="featured-section">
             <Container>
               <div className="section-header">
-                <h3 className="section-title">Featured Items</h3>
+                <h3 className="section-title">Recently Posted Finds</h3>
                 <div className="carousel-controls">
                   <Button variant="link" onClick={() => setActiveIndex(prev => Math.max(0, prev - 1))}>
                     <FiChevronLeft />

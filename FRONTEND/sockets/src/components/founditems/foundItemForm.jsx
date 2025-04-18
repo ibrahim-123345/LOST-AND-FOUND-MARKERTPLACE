@@ -44,6 +44,7 @@ const FoundItem = () => {
     formData.append("user", userid);
     
     if (image) formData.append("image", image);
+    console.log(formData)
 
     try {
       const response = await axiosInstance.post(url, formData, {

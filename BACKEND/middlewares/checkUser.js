@@ -35,6 +35,15 @@ const checkUser = async (req, res, next) => {
 const checkUserForRegistration= async (req, res, next) => {
   try {
     const { username, password } = req.body;
+    if (!username || !password ){
+
+      return res.status(404).json({ message: "sorry no details provided at all" });
+
+
+
+    }
+
+    else{
 
     await Dbconnection();
     const user = await User.findOne({ username });
@@ -43,10 +52,25 @@ const checkUserForRegistration= async (req, res, next) => {
       next();
     }
 
+    else{
+      return res.status(401).json({ message: "use another username that is taken" });
+
+    }
+
+
+
+
+
+    }
+
+
+    
+
+
+
 
     
     
-      return res.status(401).json({ message: "use another username that is taken" });
    
    
   } catch (error) {

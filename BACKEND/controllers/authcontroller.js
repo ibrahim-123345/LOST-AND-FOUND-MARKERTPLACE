@@ -2,28 +2,31 @@ require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const { Dbconnection } = require("../config/connectionURI");
-const { User } = require("../models/UserModels");
+const { User ,Createnewuser} = require("../models/UserModels");
 const { LostItem } = require("../models/losItem");
 const { FoundItem } = require("../models/foundItem")
 const secret = process.env.SECRET || "YOUR_SECRET";
 
 const registerController = async (req, res) => {
   try {
-    const { username, email, password, role } = req.body;
+    
+    const { username,email, password,country,pinCode, }= req.body;
+    console.log(username , password)
+
+
+
+    const image = req.file
+    ? `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`
+    : null;
+
     await Dbconnection();
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
-    const newUser = new User({
-      username,
-      email,
-      password: hashedPassword,
-      role
-    });
-
-    await newUser.save();
+    Createnewuser(username,email, hashedPassword,country,pinCode,image,role="User")
     res.status(201).json({ message: "User successfully created" });
   } catch (error) {
-    //res.status(500).json({ message: "Error registering user"})
+    console.log(error)
+    res.status(500).json({ message: "Error registering user"})
   }
 };
 

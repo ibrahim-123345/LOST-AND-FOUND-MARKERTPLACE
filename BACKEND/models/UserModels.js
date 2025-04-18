@@ -12,6 +12,7 @@ const Userschema = new mongoose.Schema({
     required: true,
     unique: true,
     trim: true,
+    default:"mrope@gmail.com"
   },
 
   email: {
@@ -24,19 +25,31 @@ const Userschema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
+    default:"ibra@123"
   }, 
-  role: {
+  country: {
     type: String,
-    enum: ["Admin", "User"],
-     default:"User"
+    required: true,
+    default:"Tanzania",
     },
 
-    status: {
+  pinCode: {
       type: String,
-      enum: ["Active", "Blocked"],
-       default:"Active"
+      required: true,
+      default:"67789H"
       },
-     
+
+  profileImage: {
+    type: String,
+    default: "default.jpg",
+  },
+
+    
+  role: {
+    type: String,
+    enum: ["User", "admin"],
+    default: "User",
+  },
    
 
 
@@ -49,10 +62,10 @@ const Userschema = new mongoose.Schema({
 
 const User = mongoose.model("User", Userschema);
 
-const Createnewuser = async (username, email, password, role) => {
+const Createnewuser = async (username, email, password,country,pinCode,profileImage, role) => {
   try {
     await Dbconnection();
-    const newUser = new User({ username, email, password, role });
+    const newUser = new User({ username, email, password,country,pinCode,profileImage, role});
     await newUser.save();
     console.log("new user created successfully");
   } catch (e) {
