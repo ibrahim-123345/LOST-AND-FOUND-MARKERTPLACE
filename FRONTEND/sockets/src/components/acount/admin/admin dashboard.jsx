@@ -31,11 +31,11 @@ const AdminDashboard = () => {
   const fetchAdminProfile = async () => {
     try {
       const response = await axiosInstance.get("/user/getuserBasedonToken");
-      const { user: [{ username, email, role }] } = response.data;
+      const { user: [{ username, email, role ,profileImage}] } = response.data;
       setAdminProfile({
         name: username,
-        email,
-        avatar: "",
+        email:email,
+        avatar:profileImage,
         role,
       });
     } catch (error) {
