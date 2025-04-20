@@ -172,7 +172,7 @@ const AdminDashboard = () => {
           <div className="d-flex align-items-center">
             {adminProfile.avatar ? (
               <Image
-                src={adminProfile.avatar}
+                src={adminProfile.avatars}
                 roundedCircle
                 width={40}
                 height={40}
