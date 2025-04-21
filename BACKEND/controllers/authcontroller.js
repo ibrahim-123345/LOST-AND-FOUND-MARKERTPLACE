@@ -66,7 +66,7 @@ const loginController = async (req, res) => {
 
     const user = await User.findOne({ username });
 
-    const object = { userename: user.username, role: user.role ,status:user.status}
+    const object = { userename: user.username, role: user.role ,status:user.status,id:user._id};
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }

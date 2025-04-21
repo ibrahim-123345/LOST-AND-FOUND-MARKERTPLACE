@@ -28,7 +28,8 @@ const FoundItem = () => {
   };
 
   const handleSubmit = async (e) => {
-    const userid = localStorage.getItem("userid");
+    const userid = useAuthStore.getState().userid;
+    
     e.preventDefault();
     setLoading(true);
     setError(null);
@@ -42,6 +43,7 @@ const FoundItem = () => {
     formData.append("category", category);
     formData.append("contactInfo", contactInfo);
     formData.append("user", userid);
+    console.log(userid)
     
     if (image) formData.append("image", image);
     console.log(formData)

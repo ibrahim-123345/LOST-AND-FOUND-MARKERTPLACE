@@ -11,10 +11,11 @@ const isTokenExpired = (token) => {
   try {
     const { exp } = jwtDecode(token); 
    
-    const{object:{userename,role}}=jwtDecode(token)
+    const{object:{userename,role,id}}=jwtDecode(token)
     useAuthStore.getState().setToken(token);
     useAuthStore.getState().setUsername(userename);
     useAuthStore.getState().setRole(role);
+    useAuthStore.getState().setUserId(id);
    
    
    
