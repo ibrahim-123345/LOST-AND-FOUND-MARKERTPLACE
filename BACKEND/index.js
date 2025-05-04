@@ -11,7 +11,7 @@ const {
   loginController,UserToken,passwordReset,
   deleteUser,userUpdate,
   userBasedonToken,
-  FindRegisteredUsers,
+  FindRegisteredUsers,filterProfiles
 } = require("./controllers/authcontroller");
 const {
   lostItemController,lostItem,lostItemId,itemLostByUser,
@@ -63,7 +63,9 @@ app.delete("/user/delete/:id", verfyToken,checkRoles(["Admin"]), deleteUser);
 app.patch("/user/update/:id",verfyToken, checkingStatus,checkRoles(["Admin","User"]), userUpdate);
 app.post("/password/reset",verfyToken, checkingStatus,checkRoles(["Admin","User"]) ,passwordReset);
 app.get("/user/getuserBasedonToken",verfyToken, checkingStatus,checkRoles(["Admin","User"]),userBasedonToken)
-app.get("/user/Getuser",verfyToken,checkRoles(["Admin"]),FindRegisteredUsers)
+app.get("/user/Getuser",verfyToken,checkRoles(["Admin","User"]),FindRegisteredUsers)
+app.post("/user/Getuser",verfyToken,checkRoles(["Admin","User"]),filterProfiles)
+
 
 
 

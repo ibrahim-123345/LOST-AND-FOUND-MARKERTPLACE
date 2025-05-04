@@ -15,7 +15,6 @@ import FoundItemsPage from "./components/founditems/founditemDisplay";
 import FoundItemDetails from "./components/founditems/founditemDisplayD";
 import Logout from "./components/login/logout";
 import AdminDashboard from './components/acount/admin/admin dashboard';
-import UserDashboard from './components/acount/user/account';
 import LostItemUpload from './components/lostitems/lostItemUpload'; 
 import BlockedPage from './blockedPage';
 import Register from './components/login/registeringUser';
@@ -27,6 +26,7 @@ const getUserRole = () => localStorage.getItem("role");
 // Protected Route Component (Role-Based)
 const ProtectedRoute = ({ element, allowedRoles }) => {
   const role = getUserRole();
+  console.log(role)
   return isAuthenticated() && allowedRoles.includes(role) ? element : <Navigate to="/page-not-found" replace />;
 };
 
@@ -41,7 +41,7 @@ const App = () => {
     return (
       <Router>
         <Routes>
-          <Route path="*" element={<BlockedPage />} />
+          <Route path="*" element={<PageNotFound />} />
         </Routes>
       </Router>
     );
@@ -64,7 +64,7 @@ const App = () => {
         <Route path="/lostitem/:id" element={<ProtectedRoute element={<LostItemDetails />} allowedRoles={['User', 'Admin']} />} />
         <Route path="/foundid/:id" element={<ProtectedRoute element={<FoundItemDetails />} allowedRoles={['User', 'Admin']} />} />
         <Route path="/communitychat" element={<ProtectedRoute element={<CommunityChat />} allowedRoles={['User', 'Admin']} />} />
-        <Route path="/account" element={<ProtectedRoute element={<Account />} allowedRoles={['User']} />} />
+        <Route path="/user-account" element={<ProtectedRoute element={<Account />} allowedRoles={['User']} />} />
         <Route path="/logout" element={<ProtectedRoute element={<Logout />} allowedRoles={['User', 'Admin']} />} />
 
         {/* Admin Routes */}

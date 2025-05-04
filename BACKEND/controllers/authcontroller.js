@@ -237,4 +237,44 @@ const FindRegisteredUsers=async(req,res)=>{
 
 }
 
-module.exports = { registerController, loginController, UserToken,FindRegisteredUsers, deleteUser, userUpdate, passwordReset,userBasedonToken };
+
+
+
+
+
+
+
+
+
+
+
+
+
+const filterProfiles=async(req,res)=>{
+  try {
+    const { username } = req.body;
+    await Dbconnection();
+    const user = await User.find({ username });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json(user.profileImage);}
+
+    catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+module.exports = { registerController,filterProfiles, loginController, UserToken,FindRegisteredUsers, deleteUser, userUpdate, passwordReset,userBasedonToken };

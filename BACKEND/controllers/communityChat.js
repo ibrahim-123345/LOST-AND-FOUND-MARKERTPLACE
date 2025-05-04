@@ -5,14 +5,13 @@ const { chatitem ,createchat} = require('../models/Chats');
 // Fetch all chat messages
 const getMessages = async (req, res) => {
   try {
-    // Fetch the latest chat document (you can adjust this as per your requirements)
     await Dbconnection();
-    const chat = await chatitem.find(); // Get the most recent chat
+    const chat = await chatitem.find(); 
     if (!chat) {
       return res.status(404).json({ message: 'No chat found.' });
     }
 
-    res.status(200).json(chat); // Return all messages in the chat
+    res.status(200).json(chat);
   } catch (error) {
     console.error("Error fetching messages:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -23,10 +22,10 @@ const getMessages = async (req, res) => {
 const sendMessage = async (req, res) => {
   try {
     
-    const { _id, text, createdAt, user } = req.body;
+    const { text, createdAt, user } = req.body;
     console.log(req.body)
     await Dbconnection()
-    await createchat(_id,user,text,createdAt)
+    await createchat(user,text,createdAt)
     res.status(201).json({ message: "chat inserted successfylly" });
    
    

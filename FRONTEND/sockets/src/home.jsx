@@ -54,7 +54,7 @@ const HomePage = () => {
   };
 
   const handleAccountClick = () => {
-    navigate(role === "Admin" ? "/admin" : "/User");
+    navigate(role === "Admin" ? "/admin" : "/user-account");
   };
 
   const toggleSidebar = () => {

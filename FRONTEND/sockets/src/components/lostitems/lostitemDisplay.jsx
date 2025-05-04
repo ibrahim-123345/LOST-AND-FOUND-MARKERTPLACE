@@ -37,6 +37,12 @@ const LostItemsPage = () => {
     }
   };
 
+
+  const handleAccountClick = () => {
+    const role = localStorage.getItem("role");
+    navigate(role === "Admin" ? "/admin" : "/user-account");
+  };
+
   useEffect(() => {
     fetchLostItems();
   }, []);
@@ -314,7 +320,8 @@ const LostItemsPage = () => {
         </Link>
         
         <Link 
-          to="/account" 
+          //to="/account" 
+          onClick={handleAccountClick}
           className="d-flex flex-column align-items-center"
           style={{ color: "white", textDecoration: "none" }}
         >

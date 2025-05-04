@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import {
   Container, Card, Button, Table, Tabs, Tab,
-  Row, Col, Image, Form, Modal, Badge
+  Row, Col, Image, Form, Modal, Badge, Spinner,
+  OverlayTrigger, Tooltip
 } from "react-bootstrap";
 import {
   FaEdit, FaTrash, FaUserCircle,
   FaKey, FaPlus, FaBoxOpen, FaSearch,
-  FaCalendarAlt, FaMapMarkerAlt
+  FaCalendarAlt, FaMapMarkerAlt, FaUserCog,
+  FaUserShield, FaPen, FaLock
 } from "react-icons/fa";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axiosInstance from "../../../axiosInstance";
@@ -48,11 +50,11 @@ const UserDashboard = () => {
         const response = await axiosInstance.get("/user/getuserBasedonToken");
         const data = await response.data;
         const { user: [user] } = data;
-        const { username, email, createdAt } = user;
+        const { username, email, createdAt, profileImage } = user;
         setUserProfile({
           name: username,
           email: email,
-          avatar: data.avatar || "",
+          avatar: profileImage || "",
           joinDate: moment(createdAt).format("MMMM Do YYYY")
         });
         setEditForm({ name: username, email: email });
@@ -121,21 +123,22 @@ const UserDashboard = () => {
   const renderEmptyState = (message, action, linkTo, icon) => {
     const IconComponent = icon;
     return (
-      <Card className={`text-center border-0 shadow-sm ${isDarkMode ? "bg-dark-2 text-light" : "bg-light text-dark"}`}>
-        <Card.Body className="py-5">
-          <div className="empty-state-icon mb-4">
-            <IconComponent size={60} className={`${isDarkMode ? "text-primary" : "text-secondary"}`} />
-          </div>
-          <h5 className="mb-4">{message}</h5>
-          {action && (
-            <Link to={linkTo}>
-              <Button variant="primary" className="px-4 py-2 rounded-pill">
-                <FaPlus className="me-2" /> {action}
-              </Button>
-            </Link>
-          )}
-        </Card.Body>
-      </Card>
+      <div className="text-center py-5">
+        <div className={`empty-state-icon mb-4 p-4 rounded-circle d-inline-flex ${isDarkMode ? "bg-dark-3" : "bg-light"}`}>
+          <IconComponent size={48} className={`${isDarkMode ? "text-primary" : "text-secondary"}`} />
+        </div>
+        <h4 className="mb-3">{message}</h4>
+        {action && (
+          <Link to={linkTo}>
+            <Button 
+              variant={isDarkMode ? "outline-light" : "primary"} 
+              className="px-4 py-2 rounded-pill fw-medium"
+            >
+              <FaPlus className="me-2" /> {action}
+            </Button>
+          </Link>
+        )}
+      </div>
     );
   };
 
@@ -190,22 +193,26 @@ const UserDashboard = () => {
                 </Badge>
               </td>
               <td>
-                <Button 
-                  variant="outline-primary" 
-                  size="sm" 
-                  className="me-2 rounded-circle"
-                  onClick={() => handleEditFound(item._id)}
-                >
-                  <FaEdit />
-                </Button>
-                <Button 
-                  variant="outline-danger" 
-                  size="sm" 
-                  className="rounded-circle"
-                  onClick={() => handleDeleteFound(item._id)}
-                >
-                  <FaTrash />
-                </Button>
+                <OverlayTrigger placement="top" overlay={<Tooltip>Edit Item</Tooltip>}>
+                  <Button 
+                    variant="outline-primary" 
+                    size="sm" 
+                    className="me-2 rounded-circle"
+                    onClick={() => handleEditFound(item._id)}
+                  >
+                    <FaEdit />
+                  </Button>
+                </OverlayTrigger>
+                <OverlayTrigger placement="top" overlay={<Tooltip>Delete Item</Tooltip>}>
+                  <Button 
+                    variant="outline-danger" 
+                    size="sm" 
+                    className="rounded-circle"
+                    onClick={() => handleDeleteFound(item._id)}
+                  >
+                    <FaTrash />
+                  </Button>
+                </OverlayTrigger>
               </td>
             </tr>
           ))}
@@ -249,22 +256,26 @@ const UserDashboard = () => {
                 </Badge>
               </td>
               <td>
-                <Button 
-                  variant="outline-primary" 
-                  size="sm" 
-                  className="me-2 rounded-circle"
-                  onClick={() => handleEditLost(item._id)}
-                >
-                  <FaEdit />
-                </Button>
-                <Button 
-                  variant="outline-danger" 
-                  size="sm" 
-                  className="rounded-circle"
-                  onClick={() => handleDeleteLost(item._id)}
-                >
-                  <FaTrash />
-                </Button>
+                <OverlayTrigger placement="top" overlay={<Tooltip>Edit Item</Tooltip>}>
+                  <Button 
+                    variant="outline-primary" 
+                    size="sm" 
+                    className="me-2 rounded-circle"
+                    onClick={() => handleEditLost(item._id)}
+                  >
+                    <FaEdit />
+                  </Button>
+                </OverlayTrigger>
+                <OverlayTrigger placement="top" overlay={<Tooltip>Delete Item</Tooltip>}>
+                  <Button 
+                    variant="outline-danger" 
+                    size="sm" 
+                    className="rounded-circle"
+                    onClick={() => handleDeleteLost(item._id)}
+                  >
+                    <FaTrash />
+                  </Button>
+                </OverlayTrigger>
               </td>
             </tr>
           ))}
@@ -286,48 +297,89 @@ const UserDashboard = () => {
   return (
     <Container
       fluid
-      className={`px-4 py-4 ${isDarkMode ? "bg-dark text-light" : "bg-light text-dark"}`}
+      className={`px-md-4 py-4 ${isDarkMode ? "bg-dark text-light" : "bg-light text-dark"}`}
       style={{ minHeight: "100vh" }}
     >
       {/* User Profile Header */}
-      <Card className={`mb-4 border-0 shadow-sm ${isDarkMode ? "bg-dark-2" : "bg-white"}`}>
+      <Card className={`mb-4 border-0 shadow ${isDarkMode ? "bg-dark-2" : "bg-white"}`}>
         <Card.Body className="p-4">
           <Row className="align-items-center">
-            <Col md={2} className="text-center mb-3 mb-md-0">
-              {userProfile.avatar ? (
-                <Image
-                  src={userProfile.avatar}
-                  roundedCircle
-                  width={100}
-                  height={100}
-                  className="border object-fit-cover"
-                />
-              ) : (
-                <div className="d-flex justify-content-center align-items-center bg-light rounded-circle"
-                  style={{ width: 100, height: 100 }}>
-                  <FaUserCircle size={60} className="text-secondary" />
+            <Col md={3} lg={2} className="text-center mb-4 mb-md-0">
+              <div className="position-relative d-inline-block">
+                {userProfile.avatar ? (
+                  <Image
+                    src={userProfile.avatar}
+                    roundedCircle
+                    width={180}
+                    height={180}
+                    className="border object-fit-cover shadow"
+                    style={{ borderWidth: '4px', borderColor: isDarkMode ? '#444' : '#e9ecef' }}
+                  />
+                ) : (
+                  <div 
+                    className="d-flex justify-content-center align-items-center rounded-circle shadow"
+                    style={{ 
+                      width: 180, 
+                      height: 180, 
+                      backgroundColor: isDarkMode ? '#2a2a2a' : '#f8f9fa',
+                      border: `4px solid ${isDarkMode ? '#444' : '#e9ecef'}`
+                    }}
+                  >
+                    <FaUserCircle size={100} className={isDarkMode ? "text-light" : "text-secondary"} />
+                  </div>
+                )}
+                <OverlayTrigger placement="top" overlay={<Tooltip>Edit Profile</Tooltip>}>
+                  <Button 
+                    variant="primary" 
+                    size="sm" 
+                    className="position-absolute bottom-0 end-0 rounded-circle p-2 shadow-sm"
+                    onClick={() => setShowProfileModal(true)}
+                    style={{ 
+                      transform: 'translate(25%, 25%)',
+                      width: '40px',
+                      height: '40px'
+                    }}
+                  >
+                    <FaUserCog size={18} />
+                  </Button>
+                </OverlayTrigger>
+              </div>
+            </Col>
+            <Col md={6} lg={7}>
+              <div className="d-flex flex-column">
+                <h2 className="mb-3 fw-bold" style={{ fontSize: '1.8rem' }}>{userProfile.name}</h2>
+                <div className="d-flex flex-wrap gap-3 mb-3">
+                  <div className={`p-3 rounded-3 shadow-sm ${isDarkMode ? "bg-dark-3" : "bg-light"}`}>
+                    <div className="text-muted small mb-1">Email Address</div>
+                    <div className="fw-medium d-flex align-items-center">
+                      <FaUserShield className="me-2 text-primary" />
+                      {userProfile.email}
+                    </div>
+                  </div>
+                  <div className={`p-3 rounded-3 shadow-sm ${isDarkMode ? "bg-dark-3" : "bg-light"}`}>
+                    <div className="text-muted small mb-1">Member Since</div>
+                    <div className="fw-medium d-flex align-items-center">
+                      <FaCalendarAlt className="me-2 text-primary" />
+                      {userProfile.joinDate}
+                    </div>
+                  </div>
                 </div>
-              )}
+              </div>
             </Col>
-            <Col md={6}>
-              <h3 className="mb-2">{userProfile.name}</h3>
-              <p className="text-muted mb-1"><strong>Email:</strong> {userProfile.email}</p>
-              <p className="text-muted"><strong>Member Since:</strong> {userProfile.joinDate}</p>
-            </Col>
-            <Col md={4} className="d-flex flex-column flex-md-row justify-content-md-end gap-2">
+            <Col md={3} lg={3} className="d-flex flex-column gap-3">
               <Button 
-                variant={isDarkMode ? "outline-light" : "outline-primary"} 
+                variant={isDarkMode ? "outline-light" : "primary"} 
                 onClick={() => setShowProfileModal(true)}
-                className="d-flex align-items-center justify-content-center"
+                className="d-flex align-items-center justify-content-center py-3 rounded-pill shadow-sm"
               >
-                <FaEdit className="me-1" /> Edit Profile
+                <FaPen className="me-2" /> Edit Profile
               </Button>
               <Button 
-                variant={isDarkMode ? "outline-light" : "outline-secondary"} 
+                variant={isDarkMode ? "outline-light" : "outline-primary"} 
                 onClick={() => setShowPasswordModal(true)}
-                className="d-flex align-items-center justify-content-center"
+                className="d-flex align-items-center justify-content-center py-3 rounded-pill shadow-sm"
               >
-                <FaKey className="me-1" /> Change Password
+                <FaLock className="me-2" /> Change Password
               </Button>
             </Col>
           </Row>
@@ -335,82 +387,83 @@ const UserDashboard = () => {
       </Card>
 
       {/* Main Content Tabs */}
-      <Tabs 
-        activeKey={key} 
-        onSelect={(k) => setKey(k)} 
-        className="mb-4 custom-tabs"
-      >
-        <Tab 
-          eventKey="foundItems" 
-          title={
-            <div className="d-flex align-items-center">
-              <FaBoxOpen className="me-2" />
-              <span>Found Items ({foundItems.length})</span>
-            </div>
-          }
-        >
-          {loading ? (
-            <div className="text-center py-5">
-              <div className="spinner-border text-primary" role="status">
-                <span className="visually-hidden">Loading...</span>
+      <Card className={`border-0 shadow ${isDarkMode ? "bg-dark-2" : "bg-white"}`}>
+        <Card.Body className="p-0">
+          <Tabs 
+            activeKey={key} 
+            onSelect={(k) => setKey(k)} 
+            className="px-3 pt-3 custom-tabs"
+          >
+            <Tab 
+              eventKey="foundItems" 
+              title={
+                <div className="d-flex align-items-center px-3 py-2">
+                  <FaBoxOpen className="me-2" />
+                  <span>Found Items ({foundItems.length})</span>
+                </div>
+              }
+            >
+              <div className="p-3">
+                {loading ? (
+                  <div className="text-center py-5">
+                    <Spinner animation="border" variant="primary" />
+                    <p className="mt-3">Loading your found items...</p>
+                  </div>
+                ) : foundItems.length === 0 ? (
+                  renderEmptyState(
+                    "You haven't reported any found items yet",
+                    "Report Found Item",
+                    "/foundItemReport",
+                    FaBoxOpen
+                  )
+                ) : (
+                  renderFoundItemsTable()
+                )}
               </div>
-            </div>
-          ) : foundItems.length === 0 ? (
-            renderEmptyState(
-              "You haven't reported any found items yet",
-              "Report Found Item",
-              "/foundItemReport",
-              FaBoxOpen
-            )
-          ) : (
-            <Card className={`border-0 shadow-sm ${isDarkMode ? "bg-dark-2" : "bg-white"}`}>
-              <Card.Body className="p-0">
-                {renderFoundItemsTable()}
-              </Card.Body>
-            </Card>
-          )}
-        </Tab>
+            </Tab>
 
-        <Tab 
-          eventKey="lostItems" 
-          title={
-            <div className="d-flex align-items-center">
-              <FaSearch className="me-2" />
-              <span>Lost Items ({lostItems.length})</span>
-            </div>
-          }
-        >
-          {loading ? (
-            <div className="text-center py-5">
-              <div className="spinner-border text-primary" role="status">
-                <span className="visually-hidden">Loading...</span>
+            <Tab 
+              eventKey="lostItems" 
+              title={
+                <div className="d-flex align-items-center px-3 py-2">
+                  <FaSearch className="me-2" />
+                  <span>Lost Items ({lostItems.length})</span>
+                </div>
+              }
+            >
+              <div className="p-3">
+                {loading ? (
+                  <div className="text-center py-5">
+                    <Spinner animation="border" variant="primary" />
+                    <p className="mt-3">Loading your lost items...</p>
+                  </div>
+                ) : lostItems.length === 0 ? (
+                  renderEmptyState(
+                    "You haven't reported any lost items yet",
+                    "Report Lost Item",
+                    "/lost-itemsPost",
+                    FaSearch
+                  )
+                ) : (
+                  renderLostItemsTable()
+                )}
               </div>
-            </div>
-          ) : lostItems.length === 0 ? (
-            renderEmptyState(
-              "You haven't reported any lost items yet",
-              "Report Lost Item",
-              "/lost-itemsPost",
-              FaSearch
-            )
-          ) : (
-            <Card className={`border-0 shadow-sm ${isDarkMode ? "bg-dark-2" : "bg-white"}`}>
-              <Card.Body className="p-0">
-                {renderLostItemsTable()}
-              </Card.Body>
-            </Card>
-          )}
-        </Tab>
-      </Tabs>
+            </Tab>
+          </Tabs>
+        </Card.Body>
+      </Card>
 
       {/* Profile Modal */}
       <Modal show={showProfileModal} onHide={() => setShowProfileModal(false)} centered>
         <Modal.Header closeButton className={isDarkMode ? "bg-dark-3 text-light border-dark" : ""}>
-          <Modal.Title>Edit Profile</Modal.Title>
+          <Modal.Title>
+            <FaUserCog className="me-2" />
+            Edit Profile
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body className={isDarkMode ? "bg-dark-2 text-light" : ""}>
           <Form>
-            <Form.Group controlId="formUsername" className="mb-3">
+            <Form.Group controlId="formUsername" className="mb-4">
               <Form.Label>Username</Form.Label>
               <Form.Control
                 type="text"
@@ -419,7 +472,7 @@ const UserDashboard = () => {
                 className={isDarkMode ? "bg-dark-3 text-light border-dark" : ""}
               />
             </Form.Group>
-            <Form.Group controlId="formEmail" className="mb-3">
+            <Form.Group controlId="formEmail" className="mb-4">
               <Form.Label>Email</Form.Label>
               <Form.Control
                 type="email"
@@ -439,11 +492,14 @@ const UserDashboard = () => {
       {/* Password Modal */}
       <Modal show={showPasswordModal} onHide={() => setShowPasswordModal(false)} centered>
         <Modal.Header closeButton className={isDarkMode ? "bg-dark-3 text-light border-dark" : ""}>
-          <Modal.Title>Change Password</Modal.Title>
+          <Modal.Title>
+            <FaLock className="me-2" />
+            Change Password
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body className={isDarkMode ? "bg-dark-2 text-light" : ""}>
           <Form>
-            <Form.Group controlId="formOldPassword" className="mb-3">
+            <Form.Group controlId="formOldPassword" className="mb-4">
               <Form.Label>Current Password</Form.Label>
               <Form.Control
                 type="password"
@@ -452,7 +508,7 @@ const UserDashboard = () => {
                 className={isDarkMode ? "bg-dark-3 text-light border-dark" : ""}
               />
             </Form.Group>
-            <Form.Group controlId="formNewPassword" className="mb-3">
+            <Form.Group controlId="formNewPassword" className="mb-4">
               <Form.Label>New Password</Form.Label>
               <Form.Control
                 type="password"
@@ -472,17 +528,19 @@ const UserDashboard = () => {
       {/* Custom CSS */}
       <style>{`
         .bg-dark-2 {
-          background-color: #1a1a1a;
+          background-color: ${isDarkMode ? '#1e1e1e' : '#fff'};
         }
         .bg-dark-3 {
-          background-color: #2a2a2a;
+          background-color: ${isDarkMode ? '#2a2a2a' : '#f8f9fa'};
         }
         .custom-tabs .nav-link {
           border: none;
-          padding: 12px 20px;
+          padding: 0;
+          margin-right: 8px;
           color: ${isDarkMode ? '#aaa' : '#6c757d'};
           font-weight: 500;
           transition: all 0.2s;
+          border-radius: 8px 8px 0 0;
         }
         .custom-tabs .nav-link:hover {
           color: ${isDarkMode ? '#fff' : '#0d6efd'};
@@ -490,8 +548,8 @@ const UserDashboard = () => {
         }
         .custom-tabs .nav-link.active {
           color: ${isDarkMode ? '#fff' : '#0d6efd'};
-          border-bottom: 3px solid ${isDarkMode ? '#fff' : '#0d6efd'};
           background-color: transparent;
+          border-bottom: 3px solid ${isDarkMode ? '#fff' : '#0d6efd'};
         }
         .table th {
           font-weight: 600;
@@ -503,6 +561,7 @@ const UserDashboard = () => {
         .table td {
           padding: 12px 16px;
           vertical-align: middle;
+          border-top: 1px solid ${isDarkMode ? '#2a2a2a' : '#dee2e6'};
         }
         .btn-outline-primary {
           transition: all 0.2s;
@@ -516,6 +575,9 @@ const UserDashboard = () => {
           display: flex;
           align-items: center;
           justify-content: center;
+        }
+        .object-fit-cover {
+          object-fit: cover;
         }
       `}</style>
     </Container>

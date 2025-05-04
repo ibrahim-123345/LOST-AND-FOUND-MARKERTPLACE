@@ -7,11 +7,6 @@ const Schema = mongoose.Schema;
 const chatSchema = new Schema(
   {
 
-    chatid: {
-      type: Number,
-      required: true,
-    },
-   
     username: {
       type: String,
       required: true,
@@ -36,11 +31,10 @@ const chatSchema = new Schema(
 
 const chatitem = mongoose.model("chat", chatSchema);
 
-const createchat = async (chatid,username,text,time) => {
+const createchat = async (username,text,time) => {
   try {
     await Dbconnection();
     const item = new chatitem({
-      chatid,
       username,
       text,
       time});
