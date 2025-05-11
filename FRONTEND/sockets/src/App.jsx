@@ -18,6 +18,8 @@ import AdminDashboard from './components/acount/admin/admin dashboard';
 import LostItemUpload from './components/lostitems/lostItemUpload'; 
 import BlockedPage from './blockedPage';
 import Register from './components/login/registeringUser';
+import EditFoundItem from './components/founditems/founItemsEdit';
+import EditLostItem from './components/lostitems/lostItem-update';
 
 // Authentication functions
 const isAuthenticated = () => localStorage.getItem("token") !== null;
@@ -66,6 +68,8 @@ const App = () => {
         <Route path="/communitychat" element={<ProtectedRoute element={<CommunityChat />} allowedRoles={['User', 'Admin']} />} />
         <Route path="/user-account" element={<ProtectedRoute element={<Account />} allowedRoles={['User']} />} />
         <Route path="/logout" element={<ProtectedRoute element={<Logout />} allowedRoles={['User', 'Admin']} />} />
+        <Route path="/found-edit/:id" element={<ProtectedRoute element={<EditFoundItem />} allowedRoles={['User', 'Admin']} />} />
+        <Route path="/lost-edit/:id" element={<ProtectedRoute element={<EditLostItem />} allowedRoles={['User', 'Admin']} />} />
 
         {/* Admin Routes */}
         <Route path="/admin" element={<ProtectedRoute element={<AdminDashboard />} allowedRoles={['Admin']} />} />

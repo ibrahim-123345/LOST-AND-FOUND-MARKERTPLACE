@@ -86,13 +86,20 @@ const deleteLostItem = async (req, res) => {
 
 // Controller to update lost item, including image update
 const LostItemUpddate = async (req, res) => {
-  const { id } = req.params;
-  const updateData = req.body;
-  if (req.file) {
-    updateData.image = `${req.protocol}://${req.get("host")}/uploads/${
-      req.file.filename
-    }`; // Full image URL
-  }
+   const { id } = req.params;
+  const data = req.body;
+
+  const image = req.file
+    ? `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`
+    : null;
+
+
+
+  // Construct updateData only with the fields that were provided
+  const updateData = {
+    ...data,
+    ...(image && { image }), // Only include image if it's present
+  };
 
   try {
     await Dbconnection();

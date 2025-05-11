@@ -61,7 +61,7 @@ const deleteFound = async (req, res) => {
       return res.status(404).send("Lost item not found");
     }
 
-    res.status(200).send("Lost item deleted successfully");
+    res.status(200).send("found item deleted successfully");
   } catch (err) {
     return res.status(500).send("Server error");
   }
@@ -82,7 +82,22 @@ const singleFound = async (req, res) => {
 
 const foundItemUpdate = async (req, res) => {
   const { id } = req.params;
-  const updateData = req.body;
+  const data = req.body;
+
+  const image = req.file
+    ? `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`
+    : null;
+
+
+
+  // Construct updateData only with the fields that were provided
+  const updateData = {
+    ...data,
+    ...(image && { image }), // Only include image if it's present
+  };
+
+    //console.log(updateData)
+
 
   try {
     await Dbconnection();
@@ -91,14 +106,16 @@ const foundItemUpdate = async (req, res) => {
     });
 
     if (!update) {
-      return res.status(404).send(" item was not found");
+      return res.status(404).send("Item was not found");
     }
 
-    res.status(200).send("found item updated successfully");
+    res.status(200).send("Found item updated successfully");
   } catch (err) {
+    console.error(err);
     return res.status(500).send("Server error");
   }
 };
+
 
 const itemFoundByUser = async (req, res) => {
   const { id } = req.params;

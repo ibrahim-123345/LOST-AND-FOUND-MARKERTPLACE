@@ -15,10 +15,16 @@ import axiosInstance from "../../../axiosInstance";
 import moment from "moment";
 import { Link } from "react-router-dom";
 import useThemeStore from "../../store/colorStore";
+import { useNavigate } from "react-router-dom";
+
+
+
 
 const UserDashboard = () => {
   const username = localStorage.getItem("username");
   const isDarkMode = useThemeStore((state) => state.isDarkmode);
+      const navigate=useNavigate()
+
 
   const [userProfile, setUserProfile] = useState({
     name: "",
@@ -96,7 +102,31 @@ const UserDashboard = () => {
     fetchItems();
   }, [itemBasedOnUser]);
 
-  const handleEditFound = (itemId) => console.log(`Editing found item: ${itemId}`);
+  
+
+  const handleEditFound = (itemId) => {
+    
+    window.confirm("Are you sure you want to edit this found item?")
+        navigate(`/found-edit/${itemId}`);
+
+  };
+
+
+
+
+    const handleEditLost = (itemId) => {
+      
+    
+    window.confirm("Are you sure you want to edit this found item?")
+        navigate(`/lost-edit/${itemId}`);
+    
+    };
+
+
+
+
+
+
   const handleDeleteFound = async (itemId) => {
     if (window.confirm("Are you sure you want to delete this found item?")) {
       try {
@@ -108,7 +138,6 @@ const UserDashboard = () => {
     }
   };
 
-  const handleEditLost = (itemId) => console.log(`Editing lost item: ${itemId}`);
   const handleDeleteLost = async (itemId) => {
     if (window.confirm("Are you sure you want to delete this lost item?")) {
       try {
@@ -196,7 +225,10 @@ const UserDashboard = () => {
                 <OverlayTrigger placement="top" overlay={<Tooltip>Edit Item</Tooltip>}>
                   <Button 
                     variant="outline-primary" 
-                    size="sm" 
+                    size="sm"
+                                        
+                  //to={`/found-edit/${item._id}`} 
+ 
                     className="me-2 rounded-circle"
                     onClick={() => handleEditFound(item._id)}
                   >
@@ -259,7 +291,8 @@ const UserDashboard = () => {
                 <OverlayTrigger placement="top" overlay={<Tooltip>Edit Item</Tooltip>}>
                   <Button 
                     variant="outline-primary" 
-                    size="sm" 
+                    size="sm"
+                    //to={`/found-edit/${item._id}`} 
                     className="me-2 rounded-circle"
                     onClick={() => handleEditLost(item._id)}
                   >

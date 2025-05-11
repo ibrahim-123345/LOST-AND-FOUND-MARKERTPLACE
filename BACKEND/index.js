@@ -80,7 +80,7 @@ app.post("/post/lostItem",verfyToken, checkingStatus,checkRoles(["Admin","User"]
 
 app.delete("/lost/delete/:id",verfyToken, checkingStatus,checkRoles(["Admin","User"]), deleteLostItem);
 
-app.patch("/lost/update/:id",verfyToken,checkingStatus,checkRoles(["Admin","User"]), LostItemUpddate);
+app.put("/lost/update/:id",verfyToken,checkingStatus,checkRoles(["Admin","User"]),upload.single('image'), LostItemUpddate);
 app.get("/lostItemsByUser/:id",checkingStatus,verfyToken,checkRoles(["Admin","User"]),itemLostByUser)
 
 
@@ -98,7 +98,7 @@ app.get("/foundone/:id",verfyToken,checkRoles(["Admin","User"]),singleFound);
 
 app.delete("/found/delete/:id",verfyToken,checkingStatus,checkRoles(["Admin","User"]), deleteFound);
 
-app.patch("/found/update/:id",verfyToken,checkingStatus,checkRoles(["Admin","User"]),foundItemUpdate);
+app.put("/found/update/:id",verfyToken,checkingStatus,checkRoles(["Admin","User"]),upload.single('image'),foundItemUpdate);
 
 app.post("/post/chats",verfyToken,checkingStatus,checkRoles(["Admin","User"]), postChatController);
 app.get("/User/chats",verfyToken,checkingStatus,checkRoles(["Admin","User"]), chatController);
