@@ -5,6 +5,7 @@ import axiosInstance from "../../axiosInstance";
 import { FaUpload, FaCalendarAlt, FaMapMarkerAlt, FaEnvelope, FaBox } from "react-icons/fa";
 import { Row, Col } from "react-bootstrap";
 import useThemeStore from "../store/colorStore";
+import compareAllPairs  from "../matchingUtility/comparisonUtility";
 
 const LostItemUpload = () => {
   const [itemName, setItemName] = useState("");
@@ -19,7 +20,6 @@ const LostItemUpload = () => {
   const [error, setError] = useState(null);
   const { isDarkMode } = useThemeStore();
 
-  // Set theme with proper contrast
   useEffect(() => {
     document.body.style.backgroundColor = isDarkMode ? "#121212" : "#f8f9fa";
     document.body.style.color = isDarkMode ? "#e0e0e0" : "#212529";
