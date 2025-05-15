@@ -7,6 +7,18 @@ const path = require('path');
 
 
 const {
+  createMatch,
+  getAllMatches,
+  getMatchById,
+  updateMatch,
+  deleteMatch
+} = require('./controllers/matchUtility');
+
+
+
+
+
+const {
   registerController,
   loginController,UserToken,passwordReset,
   deleteUser,userUpdate,
@@ -40,7 +52,7 @@ const { getReports ,createReportHandler} = require("./controllers/reports");
 
 
 const app = express();
-app.use(cors({origin:'http://localhost:5173'}))
+app.use(cors({origin:'*'}))
 const port = process.env.PORT ||7000;
 
 // Middleware
@@ -115,6 +127,18 @@ app.post('/reports',verfyToken,checkRoles(["Admin","User"]), createReportHandler
 
 app.get('/community/messages',verfyToken,checkRoles(["Admin","User"]), getMessages);
 app.post('/community/messages',verfyToken,checkRoles(["Admin","User"]), sendMessage);
+
+
+
+
+//matching utiltiy route
+
+app.post('/api/matches', createMatch);          
+app.get('/api/matches', getAllMatches);         
+app.get('/api/matches/:id', getMatchById);     
+app.put('/api/matches/:id', updateMatch);      
+app.delete('/api/matches/:id', deleteMatch);   
+
 
 //port listering
 app.listen(port, () => {

@@ -5,7 +5,7 @@ import axiosInstance from "../../axiosInstance";
 import { FaUpload, FaCalendarAlt, FaMapMarkerAlt, FaEnvelope, FaBox } from "react-icons/fa";
 import { Row, Col } from "react-bootstrap";
 import useThemeStore from "../store/colorStore";
-import compareAllPairs  from "../matchingUtility/comparisonUtility";
+import compareAllPairs from "../matchingUtility/comparisonUtility";
 
 const LostItemUpload = () => {
   const [itemName, setItemName] = useState("");
@@ -50,12 +50,35 @@ const LostItemUpload = () => {
     if (image) formData.append("image", image);
 
     try {
+      // First, upload the lost item
       const response = await axiosInstance.post("/post/lostItem", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
       console.log("Success:", response.data);
+
+      // Then fetch both lost and found items for comparison
+      const [foundItemsResponse, lostItemsResponse] = await Promise.all([
+        axiosInstance.get("/foundItems"),
+        axiosInstance.get("/lostItems"),
+      ]);
+
+      // Process the data in batches if needed
+      const batchSize = 10; // Adjust batch size as needed
+      const allLostItems = lostItemsResponse.data;
+      const allFoundItems = foundItemsResponse.data;
+      
+      // Compare all pairs in a single batch process
+      const matches = await compareAllPairs(allLostItems, allFoundItems);
+      console.log("Matches:", matches);
+
+      // You can now process the matches as needed (e.g., send notifications)
+      if (matches.length > 0) {
+        console.log("Potential matches found:", matches);
+        // Here you might want to send notifications or store the matches
+      }
+
       alert("Item successfully uploaded!");
       setItemName("");
       setDescription("");
@@ -65,6 +88,7 @@ const LostItemUpload = () => {
       setContact("");
       setImage(null);
       setImagePreview(null);
+
     } catch (error) {
       console.error("Error:", error);
       setError(error.response?.data?.message || "Failed to upload item. Please try again.");
@@ -73,6 +97,7 @@ const LostItemUpload = () => {
     }
   };
 
+  // Rest of your component remains unchanged...
   return (
     <div 
       className="d-flex justify-content-center align-items-center min-vh-100 py-4" 
