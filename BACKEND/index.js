@@ -14,6 +14,8 @@ const {
   deleteMatch
 } = require('./controllers/matchUtility');
 
+const {getUserProfile}=require('./controllers/profile')
+
 
 
 
@@ -77,6 +79,7 @@ app.post("/password/reset",verfyToken, checkingStatus,checkRoles(["Admin","User"
 app.get("/user/getuserBasedonToken",verfyToken, checkingStatus,checkRoles(["Admin","User"]),userBasedonToken)
 app.get("/user/Getuser",verfyToken,checkRoles(["Admin","User"]),FindRegisteredUsers)
 app.post("/user/Getuser",verfyToken,checkRoles(["Admin","User"]),filterProfiles)
+app.get("/user/profile/:username",verfyToken,checkRoles(["Admin","User"]),getUserProfile)
 
 
 

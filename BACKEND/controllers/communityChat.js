@@ -22,10 +22,10 @@ const getMessages = async (req, res) => {
 const sendMessage = async (req, res) => {
   try {
     
-    const { text, createdAt, user } = req.body;
+    const { text, createdAt, username } = req.body;
     console.log(req.body)
     await Dbconnection()
-    await createchat(user,text,createdAt)
+    await createchat(username,text,createdAt)
     res.status(201).json({ message: "chat inserted successfylly" });
    
    

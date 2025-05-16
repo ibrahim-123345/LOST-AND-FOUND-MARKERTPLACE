@@ -7,7 +7,6 @@ const createMatch = async (req, res) => {
   const incoming = req.body;
 
   try {
-    // Ensure it's always an array
     const matchList = Array.isArray(incoming) ? incoming : [incoming];
 
     await Dbconnection();

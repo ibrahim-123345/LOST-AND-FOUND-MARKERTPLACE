@@ -81,7 +81,7 @@ const Register = () => {
     if (file) {
       // Validate image type and size
       const validTypes = ["image/jpeg", "image/png", "image/gif"];
-      const maxSize = 2 * 1024 * 1024; // 2MB
+      const maxSize = 15 * 1024 * 1024; // 2MB
       
       if (!validTypes.includes(file.type)) {
         setErrors(prev => ({

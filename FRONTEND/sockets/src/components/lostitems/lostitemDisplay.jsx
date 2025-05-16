@@ -13,6 +13,7 @@ import moment from "moment";
 import useThemeStore from "../store/colorStore";
 import axiosInstance from "../../axiosInstance";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { useNavigate } from "react-router-dom";
 
 const LostItemsPage = () => {
   const [lostItems, setLostItems] = useState([]);
@@ -47,11 +48,31 @@ const LostItemsPage = () => {
     fetchLostItems();
   }, []);
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
   // Filter items
   const filteredItems = lostItems.filter(item =>
     item.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
     item.contactInfo?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    item.description?.toLowerCase().includes(searchQuery.toLowerCase())
+    item.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+     item._id?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // Pagination
@@ -365,15 +386,7 @@ const LostItemsPage = () => {
           <small style={{ fontSize: "0.75rem", marginTop: "4px" }}>Report</small>
         </Link>
         
-        <Link 
-          to="/logout" 
-          onClick={() => { localStorage.removeItem("token"); window.location.reload(); }} 
-          className="d-flex flex-column align-items-center"
-          style={{ color: "white", textDecoration: "none" }}
-        >
-          <FaSignOutAlt size={20} />
-          <small style={{ fontSize: "0.75rem", marginTop: "4px" }}>Logout</small>
-        </Link>
+     
       </nav>
     </div>
   );
