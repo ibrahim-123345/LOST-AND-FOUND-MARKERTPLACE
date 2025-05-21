@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axiosInstance from "../../axiosInstance";
 import { FaUpload, FaCalendarAlt, FaMapMarkerAlt, FaEnvelope, FaBox } from "react-icons/fa";
 import { Row, Col } from "react-bootstrap";
 import useThemeStore from "../store/colorStore";
 import compareAllPairs from "../matchingUtility/comparisonUtility";
-
-
 
 const LostItemUpload = () => {
   const [itemName, setItemName] = useState("");
@@ -66,56 +63,57 @@ const LostItemUpload = () => {
 
       const batchSize = 10;
 
-  const allLostItems = lostItemsResponse.data?.map(item => ({
-  id: item._id,
-  name: item.name,
-  description: item.description,
-  category: item.category,
-  location: item.location,
-  dateLost: item.dateLost,
-  contactInfo: item.contactInfo,
-  status: item.status,
-  image: item.image,
-  createdAt: item.createdAt,
-  updatedAt: item.updatedAt,
-  user: {
-    id: item.user?._id,
-    username: item.user?.username,
-    email: item.user?.email,
-    country: item.user?.country,
-    pinCode: item.user?.pinCode,
-    profileImage: item.user?.profileImage,
-    role: item.user?.role,
-    createdAt: item.user?.createdAt,
-  }
-})) || [];
+      const allLostItems = lostItemsResponse.data?.map(item => ({
+        id: item._id,
+        name: item.name,
+        description: item.description,
+        category: item.category,
+        location: item.location,
+        dateLost: item.dateLost,
+        contactInfo: item.contactInfo,
+        status: item.status,
+        image: item.image,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+        user: {
+          id: item.user?._id,
+          username: item.user?.username,
+          email: item.user?.email,
+          country: item.user?.country,
+          pinCode: item.user?.pinCode,
+          profileImage: item.user?.profileImage,
+          role: item.user?.role,
+          createdAt: item.user?.createdAt,
+        }
+      })) || [];
 
-const allFoundItems = foundItemsResponse.data?.map(item => ({
-  id: item._id,
-  name: item.name,
-  description: item.description,
-  category: item.category,
-  location: item.location,
-  dateFound: item.dateFound,
-  contactInfo: item.contactInfo,
-  status: item.status,
-  image: item.image,
-  createdAt: item.createdAt,
-  updatedAt: item.updatedAt,
-  user: {
-    id: item.user?._id,
-    username: item.user?.username,
-    email: item.user?.email,
-    country: item.user?.country,
-    pinCode: item.user?.pinCode,
-    profileImage: item.user?.profileImage,
-    role: item.user?.role,
-    createdAt: item.user?.createdAt,
-  }
-})) || [];
+      const allFoundItems = foundItemsResponse.data?.map(item => ({
+        id: item._id,
+        name: item.name,
+        description: item.description,
+        category: item.category,
+        location: item.location,
+        dateFound: item.dateFound,
+        contactInfo: item.contactInfo,
+        status: item.status,
+        image: item.image,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+        user: {
+          id: item.user?._id,
+          username: item.user?.username,
+          email: item.user?.email,
+          country: item.user?.country,
+          pinCode: item.user?.pinCode,
+          profileImage: item.user?.profileImage,
+          role: item.user?.role,
+          createdAt: item.user?.createdAt,
+        }
+      })) || [];
 
+      const filteredLostItems = allLostItems.filter(item => item.status !== "found");
 
-      const matches = await compareAllPairs(allLostItems, allFoundItems);
+      const matches = await compareAllPairs(filteredLostItems, allFoundItems);
       console.log("Matches:", matches);
 
       if (matches.length > 0) {
@@ -139,7 +137,6 @@ const allFoundItems = foundItemsResponse.data?.map(item => ({
       setLoading(false);
     }
   };
-
   return (
     <div 
       className="d-flex justify-content-center align-items-center min-vh-100 py-4" 

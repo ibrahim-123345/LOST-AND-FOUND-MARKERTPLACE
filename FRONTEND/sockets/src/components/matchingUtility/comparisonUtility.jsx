@@ -5,6 +5,8 @@ const TOGETHER_MODEL = "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free";
 const TOGETHER_API_KEY = "cd01dfd203806c4248c2221302ea68c87fec4287aa8602cfb16df23838ed1fe4"
 
 const SAVE_MATCHES_URL = "api/matches";
+import axiosInstance from "../../axiosInstance";
+
 
 
 
@@ -147,6 +149,10 @@ export async function compareAllPairs(lostItems, foundItems, threshold = 0.6) {
     for (const match of bestMatches) {
       try {
         await axiosInstance.post(SAVE_MATCHES_URL, match);
+        await axiosInstance.put(`/lost/update/${match.lostItemId}`, {
+          status: "found",
+        });
+
       } catch (err) {
         console.error("Failed to save match to server:", err.message);
       }
