@@ -1,17 +1,16 @@
-import axios from "axios";
-import axiosInstance from "../../axiosInstance";
 
-// Together API endpoint and model
+
 const TOGETHER_URL = "https://api.together.xyz/v1/chat/completions";
 const TOGETHER_MODEL = "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free"; 
-const TOGETHER_API_KEY = "b1e2f1ce303ec19b656f3e45aef877f5038ef5072e02281b2f19980edc642c52"
+const TOGETHER_API_KEY = "cd01dfd203806c4248c2221302ea68c87fec4287aa8602cfb16df23838ed1fe4"
 
 const SAVE_MATCHES_URL = "api/matches";
 
-/**
- * Create a batch prompt for LLM
- */
-const  createBatchPrompt=(lostItems, foundItems)=> {
+
+
+
+
+const createBatchPrompt = (lostItems, foundItems) => {
   let prompt = `
 You are a semantic analyzer tasked with comparing pairs of lost and found items.
 
@@ -42,7 +41,7 @@ Please respond ONLY with the JSON array described above, nothing else.
 `;
 
   return prompt;
-}
+};
 
 export async function compareAllPairs(lostItems, foundItems, threshold = 0.6) {
   const prompt = createBatchPrompt(lostItems, foundItems);
@@ -87,11 +86,11 @@ export async function compareAllPairs(lostItems, foundItems, threshold = 0.6) {
 
       if (!matchesForLost.length) {
         bestMatches.push({
-          lostItemId: lost._id,
+          lostItemId: lost.id,
           foundItemId: null,
           lostUser: {
-            username: lost.username || "unknown",
-            email: lost.email || "unknown@example.com",
+            username: lost.user?.username || "unknown",
+            email: lost.user?.email || "unknown@example.com",
           },
           foundUser: {
             username: null,
@@ -111,15 +110,15 @@ export async function compareAllPairs(lostItems, foundItems, threshold = 0.6) {
       if (best.score >= threshold) {
         const found = foundItems[best.foundIndex];
         bestMatches.push({
-          lostItemId: lost._id,
-          foundItemId: found._id,
+          lostItemId: lost.id,
+          foundItemId: found.id,
           lostUser: {
-            username: lost.username || "unknown",
-            email: lost.email || "unknown@example.com",
+            username: lost.user?.username || "unknown",
+            email: lost.contactInfo || "unknown@example.com",
           },
           foundUser: {
-            username: found.username || "unknown",
-            email: found.email || "unknown@example.com",
+            username: found.user?.username || "unknown",
+            email: found.contactInfo || "unknown@example.com",
           },
           matchScore: best.score,
           status: "pending",
@@ -127,11 +126,11 @@ export async function compareAllPairs(lostItems, foundItems, threshold = 0.6) {
         });
       } else {
         bestMatches.push({
-          lostItemId: lost._id,
+          lostItemId: null,
           foundItemId: null,
           lostUser: {
-            username: lost.username || "unknown",
-            email: lost.email || "unknown@example.com",
+            username: lost.user?.username || "unknown",
+            email: lost.user?.email || "unknown@example.com",
           },
           foundUser: {
             username: null,
@@ -144,6 +143,7 @@ export async function compareAllPairs(lostItems, foundItems, threshold = 0.6) {
       }
     });
 
+    // Send to your server
     for (const match of bestMatches) {
       try {
         await axiosInstance.post(SAVE_MATCHES_URL, match);
@@ -160,30 +160,4 @@ export async function compareAllPairs(lostItems, foundItems, threshold = 0.6) {
   }
 }
 
-
-
-
-
-
 export default compareAllPairs;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

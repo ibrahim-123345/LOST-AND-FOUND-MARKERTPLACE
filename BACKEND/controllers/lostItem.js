@@ -3,11 +3,14 @@ const { LostItem, createLostItem } = require("../models/losItem");
 const express = require("express");
 const app = express();
 
-// Fetch all lost items
+// Fetch recent 4 lost items with user populated
 const lostItem = async (req, res) => {
   try {
     await Dbconnection();
-    const items = await LostItem.find().limit(4).sort({ createdAt: -1 });
+    const items = await LostItem.find()
+      .limit(4)
+      .sort({ createdAt: -1 })
+      .populate("user"); 
     res.status(200).json(items);
   } catch (error) {
     res.status(500).json({ error: "Server Error" });
@@ -17,25 +20,21 @@ const lostItem = async (req, res) => {
 const lostItems = async (req, res) => {
   try {
     await Dbconnection();
-    const items = await LostItem.find();
+    const items = await LostItem.find().populate("user"); 
     res.status(200).json(items);
   } catch (error) {
     res.status(500).json({ error: "Server Error" });
   }
 };
 
-// Handle Lost Item Upload
 const lostItemController = async (req, res) => {
   try {
-    await Dbconnection(); // Ensure DB is connected
-
-    const { name, description, dateLost, location, contactInfo, user } =
-      req.body;
+    await Dbconnection();
+    const { name, description, dateLost, location, contactInfo, user } = req.body;
     const image = req.file
       ? `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`
-      : null; // Full image URL
+      : null;
 
-    // Create lost item entry
     const newItem = await createLostItem(
       name,
       description,
@@ -56,7 +55,7 @@ const lostItemId = async (req, res) => {
   const { id } = req.params;
   try {
     await Dbconnection();
-    const item = await LostItem.findById(id);
+    const item = await LostItem.findById(id).populate("user"); // 
     if (!item) {
       return res.status(404).send("Item not found");
     }
@@ -66,39 +65,30 @@ const lostItemId = async (req, res) => {
   }
 };
 
-// Controller to delete lost item
 const deleteLostItem = async (req, res) => {
   const { id } = req.params;
-
   try {
     await Dbconnection();
     const deletedItem = await LostItem.findOneAndDelete({ _id: id });
-
     if (!deletedItem) {
       return res.status(404).send("Lost item not found");
     }
-
     res.status(200).send("Lost item deleted successfully");
   } catch (err) {
     return res.status(500).send("Server error");
   }
 };
 
-// Controller to update lost item, including image update
 const LostItemUpddate = async (req, res) => {
-   const { id } = req.params;
+  const { id } = req.params;
   const data = req.body;
-
   const image = req.file
     ? `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`
     : null;
 
-
-
-  // Construct updateData only with the fields that were provided
   const updateData = {
     ...data,
-    ...(image && { image }), // Only include image if it's present
+    ...(image && { image }),
   };
 
   try {
@@ -119,10 +109,9 @@ const LostItemUpddate = async (req, res) => {
 
 const itemLostByUser = async (req, res) => {
   const { id } = req.params;
-
   try {
     await Dbconnection();
-    const item = await LostItem.find({ user: id });
+    const item = await LostItem.find({ user: id }).populate("user"); 
     res.status(200).json(item);
   } catch (err) {
     return res.status(500).send("Server error");

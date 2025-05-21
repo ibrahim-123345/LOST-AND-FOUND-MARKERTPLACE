@@ -7,6 +7,8 @@ import { Row, Col } from "react-bootstrap";
 import useThemeStore from "../store/colorStore";
 import compareAllPairs from "../matchingUtility/comparisonUtility";
 
+
+
 const LostItemUpload = () => {
   const [itemName, setItemName] = useState("");
   const [description, setDescription] = useState("");
@@ -50,7 +52,6 @@ const LostItemUpload = () => {
     if (image) formData.append("image", image);
 
     try {
-      // First, upload the lost item
       const response = await axiosInstance.post("/post/lostItem", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -58,25 +59,67 @@ const LostItemUpload = () => {
       });
       console.log("Success:", response.data);
 
-      // Then fetch both lost and found items for comparison
       const [foundItemsResponse, lostItemsResponse] = await Promise.all([
         axiosInstance.get("/foundItems"),
         axiosInstance.get("/lostItems"),
       ]);
 
-      // Process the data in batches if needed
-      const batchSize = 10; // Adjust batch size as needed
-      const allLostItems = lostItemsResponse.data;
-      const allFoundItems = foundItemsResponse.data;
-      
-      // Compare all pairs in a single batch process
+      const batchSize = 10;
+
+  const allLostItems = lostItemsResponse.data?.map(item => ({
+  id: item._id,
+  name: item.name,
+  description: item.description,
+  category: item.category,
+  location: item.location,
+  dateLost: item.dateLost,
+  contactInfo: item.contactInfo,
+  status: item.status,
+  image: item.image,
+  createdAt: item.createdAt,
+  updatedAt: item.updatedAt,
+  user: {
+    id: item.user?._id,
+    username: item.user?.username,
+    email: item.user?.email,
+    country: item.user?.country,
+    pinCode: item.user?.pinCode,
+    profileImage: item.user?.profileImage,
+    role: item.user?.role,
+    createdAt: item.user?.createdAt,
+  }
+})) || [];
+
+const allFoundItems = foundItemsResponse.data?.map(item => ({
+  id: item._id,
+  name: item.name,
+  description: item.description,
+  category: item.category,
+  location: item.location,
+  dateFound: item.dateFound,
+  contactInfo: item.contactInfo,
+  status: item.status,
+  image: item.image,
+  createdAt: item.createdAt,
+  updatedAt: item.updatedAt,
+  user: {
+    id: item.user?._id,
+    username: item.user?.username,
+    email: item.user?.email,
+    country: item.user?.country,
+    pinCode: item.user?.pinCode,
+    profileImage: item.user?.profileImage,
+    role: item.user?.role,
+    createdAt: item.user?.createdAt,
+  }
+})) || [];
+
+
       const matches = await compareAllPairs(allLostItems, allFoundItems);
       console.log("Matches:", matches);
 
-      // You can now process the matches as needed (e.g., send notifications)
       if (matches.length > 0) {
         console.log("Potential matches found:", matches);
-        // Here you might want to send notifications or store the matches
       }
 
       alert("Item successfully uploaded!");
@@ -97,7 +140,6 @@ const LostItemUpload = () => {
     }
   };
 
-  // Rest of your component remains unchanged...
   return (
     <div 
       className="d-flex justify-content-center align-items-center min-vh-100 py-4" 

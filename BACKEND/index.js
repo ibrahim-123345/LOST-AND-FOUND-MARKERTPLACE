@@ -85,11 +85,11 @@ app.get("/user/profile/:username",verfyToken,checkRoles(["Admin","User"]),getUse
 
 
 //lost item crud
-app.get("/lostItems",verfyToken, checkingStatus,checkRoles(["Admin","User"]),lostItem);//this endpoint have limit
+app.get("/lostItems",verfyToken, checkingStatus,checkRoles(["Admin","User"]),lostItem);
 
-app.get("/lostItem/:id",verfyToken, checkingStatus,checkRoles(["Admin","User"]),lostItemId);//this endpoint to specific based input id
+app.get("/lostItem/:id",verfyToken, checkingStatus,checkRoles(["Admin","User"]),lostItemId);
 
-app.get("/lostItem",verfyToken, checkingStatus,lostItems);//this endpoint have no limit it displays all losts item reported
+app.get("/lostItem",lostItems);
 
 app.post("/post/lostItem",verfyToken, checkingStatus,checkRoles(["Admin","User"]),upload.single('image') ,lostItemController);
 
@@ -100,7 +100,6 @@ app.get("/lostItemsByUser/:id",checkingStatus,verfyToken,checkRoles(["Admin","Us
 
 
 
-//found items crud
 
 app.post("/foundItems",verfyToken,checkingStatus,checkRoles(["Admin","User"]),upload.single('image'), foundItemController);
 app.get("/foundItems",checkingStatus,checkingStatus, foundItems);
@@ -121,7 +120,6 @@ app.get("/User/chats",verfyToken,checkingStatus,checkRoles(["Admin","User"]), ch
 
 
 
-//chats crud and reports
 
 
 app.get('/reports',verfyToken,checkRoles(["Admin","User"]), getReports);
@@ -134,7 +132,6 @@ app.post('/community/messages',verfyToken,checkRoles(["Admin","User"]), sendMess
 
 
 
-//matching utiltiy route
 
 app.post('/api/matches', createMatch);          
 app.get('/api/matches', getAllMatches);         
@@ -143,7 +140,6 @@ app.put('/api/matches/:id', updateMatch);
 app.delete('/api/matches/:id', deleteMatch);   
 
 
-//port listering
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
