@@ -113,15 +113,17 @@ const FoundItemDetails = () => {
                 {moment(item.dateFound).fromNow()}
               </p>
             </div>
-            <Button
-              variant={isDarkMode ? "outline-light" : "outline-primary"}
-              className="d-flex align-items-center"
-              as={Link}
-              to="/"  // Changed to point to home page
-            >
-              <IoMdChatboxes className="me-2" />
-              Chat
-            </Button>
+            {item.status === "found" && (
+              <Button
+                variant={isDarkMode ? "outline-light" : "outline-primary"}
+                className="d-flex align-items-center"
+                as={Link}
+                to="/"
+              >
+                <IoMdChatboxes className="me-2" />
+                Chat
+              </Button>
+            )}
           </div>
 
           <hr style={{ borderColor: isDarkMode ? "#495057" : "#e9ecef" }} />

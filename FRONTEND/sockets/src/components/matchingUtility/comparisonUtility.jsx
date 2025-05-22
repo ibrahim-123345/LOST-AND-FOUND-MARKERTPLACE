@@ -7,13 +7,13 @@ import axiosInstance from "../../axiosInstance";
 import axios from "axios";
 import { jsonrepair } from "jsonrepair";
 
-const { sendFoundItemNotification } = require("./emailTool"); 
+//import { sendFoundItemNotification } from "./emailTool"; 
 
-const createBatchPrompt = (lostItems, foundItems) => {
+const createBatchPrompt = (lostItems, foundItems, threshold = 0.6) => {
   let prompt = `
 You are a semantic analyzer tasked with comparing lost and found items based on their descriptions.
 
-For each relevant match (score ≥ 0.6), return an object with the following structure:
+For each relevant match (score ≥ ${threshold}), return an object with the following structure:
 
 {
   "lostItemId": "<lost item ID>",
@@ -31,7 +31,7 @@ For each relevant match (score ≥ 0.6), return an object with the following str
   "explanation": "<short explanation why these items match>"
 }
 
-Only include matches with a score of 0.6 or above.
+Only include matches with a score of ${threshold} or above.
 
 Here are the lost and found item pairs to compare:
 `;
@@ -61,7 +61,7 @@ IMPORTANT: Return ONLY the JSON array described above. No extra text or formatti
 };
 
 export async function compareAllPairs(lostItems, foundItems, threshold = 0.6) {
-  const prompt = createBatchPrompt(lostItems, foundItems);
+  const prompt = createBatchPrompt(lostItems, foundItems, threshold);
 
   try {
     const res = await axios.post(
@@ -96,9 +96,9 @@ export async function compareAllPairs(lostItems, foundItems, threshold = 0.6) {
 
     const bestMatches = [];
 
-    const matchedLostIds = new Set(comparisonResults.map(m => m.lostItemId));
+    const matchedLostIds = new Set(comparisonResults.map((m) => m.lostItemId));
 
-    // Add valid matches
+    // Add valid matches (already filtered by LLM)
     for (const match of comparisonResults) {
       bestMatches.push(match);
     }
@@ -124,7 +124,7 @@ export async function compareAllPairs(lostItems, foundItems, threshold = 0.6) {
       }
     }
 
-    // Send to your server and send email for valid matches only
+    // Send to your server and trigger email notification for strong matches
     for (const match of bestMatches) {
       try {
         await axiosInstance.post(SAVE_MATCHES_URL, match);
@@ -135,22 +135,30 @@ export async function compareAllPairs(lostItems, foundItems, threshold = 0.6) {
           });
         }
 
-        // Send email notification only for matches above or equal to threshold
         if (
           match.matchScore >= threshold &&
           match.lostUser?.email &&
           match.foundUser?.email
         ) {
           try {
-            await sendFoundItemNotification(match.lostUser.email, {
-              lostItemId: match.lostItemId,
-              foundItemId: match.foundItemId,
-              lostUsername: match.lostUser.username,
-              foundUsername: match.foundUser.username,
-              explanation: match.explanation,
+            const response = await axiosInstance.post("http://localhost:7000/email/notify", {
+              email: match.lostUser.email,
+              data: {
+                lostItemId: match.lostItemId,
+                foundItemId: match.foundItemId,
+                lostUsername: match.lostUser.username,
+                foundUsername: match.foundUser.username,
+                explanation: match.explanation,
+                claimLink: `http://localhost:5173/foundid/${match.foundItemId}`,
+              },
             });
+
+            console.log("Email result:", response.data.message);
           } catch (emailErr) {
-            console.error("Email sending failed:", emailErr.message);
+            console.error(
+              "Email sending failed:",
+              emailErr.response?.data?.error || emailErr.message
+            );
           }
         }
       } catch (err) {

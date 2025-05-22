@@ -49,6 +49,7 @@ const{checkingStatus}=require("./middlewares/checkingBlockedUser")
 const{checkRoles}=require('./middlewares/checkRoles')
 const { chatController ,postChatController} = require("./controllers/chatController");
 const { getReports ,createReportHandler} = require("./controllers/reports");
+const { sendFoundItemNotification, sendFoundItemNotificationController } = require("./controllers/email");
 
 
 
@@ -139,6 +140,11 @@ app.get('/api/matches/:id', getMatchById);
 app.put('/api/matches/:id', updateMatch);      
 app.delete('/api/matches/:id', deleteMatch);   
 
+
+
+//email notification
+
+app.post("/email/notify", verfyToken, checkingStatus,checkRoles(["Admin","User"]),sendFoundItemNotificationController);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

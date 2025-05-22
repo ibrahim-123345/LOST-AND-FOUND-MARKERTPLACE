@@ -82,7 +82,7 @@ const LostItemDetails = () => {
         >
           <img
             src={item.image}
-            alt="Found Item"
+            alt="Lost Item"
             style={{
               width: "100%",
               height: "100%",
@@ -113,15 +113,17 @@ const LostItemDetails = () => {
                 {moment(item.dateFound).fromNow()}
               </p>
             </div>
-            <Button
-              variant={isDarkMode ? "outline-light" : "outline-primary"}
-              className="d-flex align-items-center"
-              as={Link}
-              to="/"  // Changed to point to home page
-            >
-              <IoMdChatboxes className="me-2" />
-              Chat
-            </Button>
+            {item.status === "found" && (
+              <Button
+                variant={isDarkMode ? "outline-light" : "outline-primary"}
+                className="d-flex align-items-center"
+                as={Link}
+                to="/"
+              >
+                <IoMdChatboxes className="me-2" />
+                Chat
+              </Button>
+            )}
           </div>
 
           <hr style={{ borderColor: isDarkMode ? "#495057" : "#e9ecef" }} />
@@ -155,7 +157,7 @@ const LostItemDetails = () => {
                 color: isDarkMode ? "#f8f9fa" : "#343a40",
               }}
             >
-              Found Location
+              Lost Location
             </h5>
             <p
               style={{
