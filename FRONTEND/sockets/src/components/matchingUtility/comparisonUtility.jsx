@@ -96,11 +96,14 @@ export async function compareAllPairs(lostItems, foundItems, threshold = 0.6) {
 
     const bestMatches = [];
 
-    const matchedLostIds = new Set(comparisonResults.map((m) => m.lostItemId));
+    const matchedLostIds = new Set();
 
-    // Add valid matches (already filtered by LLM)
+    // Add only valid matches (>= threshold)
     for (const match of comparisonResults) {
-      bestMatches.push(match);
+      if (match.matchScore >= threshold) {
+        bestMatches.push(match);
+        matchedLostIds.add(match.lostItemId);
+      }
     }
 
     // Add unmatched lost items
@@ -124,45 +127,43 @@ export async function compareAllPairs(lostItems, foundItems, threshold = 0.6) {
       }
     }
 
-    // Send to your server and trigger email notification for strong matches
+    // Send valid matches (≥ threshold) to backend
     for (const match of bestMatches) {
-      try {
-        await axiosInstance.post(SAVE_MATCHES_URL, match);
+      const isValidMatch = match.matchScore >= threshold;
 
-        if (match.lostItemId) {
-          await axiosInstance.put(`/lost/update/${match.lostItemId}`, {
-            status: "found",
-          });
-        }
+      if (isValidMatch) {
+        try {
+          await axiosInstance.post(SAVE_MATCHES_URL, match);
 
-        if (
-          match.matchScore >= threshold &&
-          match.lostUser?.email &&
-          match.foundUser?.email
-        ) {
-          try {
-            const response = await axiosInstance.post("http://localhost:7000/email/notify", {
-              email: match.lostUser.email,
-              data: {
-                lostItemId: match.lostItemId,
-                foundItemId: match.foundItemId,
-                lostUsername: match.lostUser.username,
-                foundUsername: match.foundUser.username,
-                explanation: match.explanation,
-                claimLink: `http://localhost:5173/foundid/${match.foundItemId}`,
-              },
+          if (isValidMatch) {
+            await axiosInstance.put(`/lost/update/${match.lostItemId}`, {
+              status: "found",
             });
 
-            console.log("Email result:", response.data.message);
-          } catch (emailErr) {
-            console.error(
-              "Email sending failed:",
-              emailErr.response?.data?.error || emailErr.message
-            );
+            // Send email notification
+            if (match.lostUser?.email && match.foundUser?.email) {
+              try {
+                const response = await axiosInstance.post("http://localhost:7000/email/notify", {
+                  email: match.lostUser.email,
+                  data: {
+                    lostItemId: match.lostItemId,
+                    foundItemId: match.foundItemId,
+                    lostUsername: match.lostUser.username,
+                    foundUsername: match.foundUser.username,
+                    explanation: match.explanation,
+                    claimLink: `http://localhost:5173/foundid/${match.foundItemId}`,
+                  },
+                });
+
+                console.log("Email result:", response.data.message);
+              } catch (emailErr) {
+                console.error("Email sending failed:", emailErr.response?.data?.error || emailErr.message);
+              }
+            }
           }
+        } catch (err) {
+          console.error("Failed to save match to server:", err.message);
         }
-      } catch (err) {
-        console.error("Failed to save match to server:", err.message);
       }
     }
 
