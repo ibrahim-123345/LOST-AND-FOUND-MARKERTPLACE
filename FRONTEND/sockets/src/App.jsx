@@ -20,6 +20,7 @@ import BlockedPage from './blockedPage';
 import Register from './components/login/registeringUser';
 import EditFoundItem from './components/founditems/founItemsEdit';
 import EditLostItem from './components/lostitems/lostItem-update';
+import ChatApp from './components/chatRoom/chat';
 
 // Authentication functions
 const isAuthenticated = () => localStorage.getItem("token") !== null;
@@ -57,6 +58,7 @@ const App = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginRedirect />} />
         <Route path="/register" element={<Register/>} />
+        <Route path="/chat" element={<ChatApp/>} />
 
         {/* Protected Routes */}
         <Route path="/lost-itemsPost" element={<ProtectedRoute element={<LostItemUpload />} allowedRoles={['User', 'Admin']} />} />

@@ -40,6 +40,7 @@ const FoundItemsPage = () => {
     try {
       const response = await axiosInstance.get("foundItems");
       setFoundItems(response.data || []);
+      
     } catch (error) {
       console.error("Error fetching found items:", error);
     }
@@ -47,6 +48,7 @@ const FoundItemsPage = () => {
 
   useEffect(() => {
     fetchFoundItems();
+
   }, []);
 
   const filteredItems = foundItems.filter(item =>

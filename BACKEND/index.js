@@ -16,7 +16,7 @@ const {
 
 const {getUserProfile}=require('./controllers/profile')
 
-
+const { startChat,getMessage,getUserChat,sendMessages } = require('./controllers/messageController');
 
 
 
@@ -50,6 +50,7 @@ const{checkRoles}=require('./middlewares/checkRoles')
 const { chatController ,postChatController} = require("./controllers/chatController");
 const { getReports ,createReportHandler} = require("./controllers/reports");
 const { sendFoundItemNotification, sendFoundItemNotificationController } = require("./controllers/email");
+const { getRoomById } = require("./controllers/rooms");
 
 
 
@@ -103,7 +104,7 @@ app.get("/lostItemsByUser/:id",checkingStatus,verfyToken,checkRoles(["Admin","Us
 
 
 app.post("/foundItems",verfyToken,checkingStatus,checkRoles(["Admin","User"]),upload.single('image'), foundItemController);
-app.get("/foundItems",checkingStatus,checkingStatus, foundItems);
+app.get("/foundItems", foundItems);
 app.get("/foundItem",foundItemLimit);
 app.get("/foundItemsByUser/:id",verfyToken,checkingStatus,checkRoles(["Admin","User"]),itemFoundByUser)
 
@@ -133,13 +134,21 @@ app.post('/community/messages',verfyToken,checkRoles(["Admin","User"]), sendMess
 
 
 
-
+//matches
 app.post('/api/matches', createMatch);          
-app.get('/api/matches', getAllMatches);         
-app.get('/api/matches/:id', getMatchById);     
-app.put('/api/matches/:id', updateMatch);      
-app.delete('/api/matches/:id', deleteMatch);   
+app.get('/matches', getAllMatches);         
+app.get('/matches/:id', getMatchById);     
+app.put('/matches/:id', updateMatch);      
+app.delete('/matches/:id', deleteMatch);  
 
+
+
+//chatRooms
+app.get('/chat/user/:userId', getUserChat);
+app.get('/messages/:roomId', getMessage);
+app.post('/start', startChat);
+app.post('/send', sendMessages);
+app.get('/room/:roomId', getRoomById);
 
 
 //email notification

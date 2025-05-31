@@ -10,7 +10,7 @@ const getMessages = async (req, res) => {
     if (!chat) {
       return res.status(404).json({ message: 'No chat found.' });
     }
-
+    console.log(chat)
     res.status(200).json(chat);
   } catch (error) {
     console.error("Error fetching messages:", error);
@@ -21,6 +21,8 @@ const getMessages = async (req, res) => {
 // Send a new message to the chat
 const sendMessage = async (req, res) => {
   try {
+
+    console.log(req.body)
     
     const { text, createdAt, username } = req.body;
     console.log(req.body)

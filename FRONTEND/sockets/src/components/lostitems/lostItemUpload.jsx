@@ -76,7 +76,7 @@ const LostItemUpload = () => {
         createdAt: item.createdAt,
         updatedAt: item.updatedAt,
         user: {
-          id: item.user?._id,
+          lostUserId: item.user?._id,
           username: item.user?.username,
           email: item.user?.email,
           country: item.user?.country,
@@ -90,6 +90,7 @@ const LostItemUpload = () => {
       const allFoundItems = foundItemsResponse.data?.map(item => ({
         id: item._id,
         name: item.name,
+        foundId: item.foundUserId,
         description: item.description,
         category: item.category,
         location: item.location,
@@ -100,7 +101,7 @@ const LostItemUpload = () => {
         createdAt: item.createdAt,
         updatedAt: item.updatedAt,
         user: {
-          id: item.user?._id,
+          founderUserId: item.user?._id,
           username: item.user?.username,
           email: item.user?.email,
           country: item.user?.country,
@@ -110,6 +111,8 @@ const LostItemUpload = () => {
           createdAt: item.user?.createdAt,
         }
       })) || [];
+      console.log("All Lost Items:", allLostItems);
+      console.log("All Found Items:", allFoundItems);
 
       const filteredLostItems = allLostItems.filter(item => item.status !== "found");
 

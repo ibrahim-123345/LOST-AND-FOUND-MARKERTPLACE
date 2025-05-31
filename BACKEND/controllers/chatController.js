@@ -30,17 +30,6 @@ if (!username || !chat || !roomid) {
 
     createchat(username, chat,roomid)
 
-    
-
-
-
-   
-
-
-
-    
-
-
 
 
 }

@@ -20,11 +20,13 @@ For each relevant match (score ≥ ${threshold}), return an object with the foll
   "foundItemId": "<found item ID>",
   "lostUser": {
     "username": "<lost item user username or 'unknown'>",
-    "email": "<lost item user email or 'unknown@example.com'>"
+    "email": "<lost item user email or 'unknown@example.com'>",
+    "userId": "<lost item user lostUserId>"
   },
   "foundUser": {
     "username": "<found item user username or 'unknown'>",
-    "email": "<found item user email or 'unknown@example.com'>"
+    "email": "<found item user email or 'unknown@example.com'>",
+    "userId": "<found item user founderUserId>"
   },
   "matchScore": <number between 0 and 1>,
   "status": "pending",
@@ -36,17 +38,20 @@ Only include matches with a score of ${threshold} or above.
 Here are the lost and found item pairs to compare:
 `;
 
+
   lostItems.forEach((lost) => {
     foundItems.forEach((found) => {
+      //console.log(lost.user.lostUserId)
+      //console.log(found.user.founderUserId)
       prompt += `
 Lost:
 - ID: ${lost.id}
-- User: ${lost.user?.username || "unknown"}, ${lost.user?.email || "unknown@example.com"}
+- User: ${lost.user?.username || "unknown"}, ${lost.user?.email || "unknown@example.com"},${lost.user?.lostUserId}
 - Description: "${lost.description}"
 
 Found:
 - ID: ${found.id}
-- User: ${found.user?.username || "unknown"}, ${found.contactInfo || "unknown@example.com"}
+- User: ${found.user?.username || "unknown"}, ${found.user?.email || "unknown@example.com"},${found.user?.founderUserId}
 - Description: "${found.description}"
 `;
     });
@@ -143,7 +148,7 @@ export async function compareAllPairs(lostItems, foundItems, threshold = 0.6) {
             // Send email notification
             if (match.lostUser?.email && match.foundUser?.email) {
               try {
-                const response = await axiosInstance.post("http://localhost:7000/email/notify", {
+                const response = await axiosInstance.post("/email/notify", {
                   email: match.lostUser.email,
                   data: {
                     lostItemId: match.lostItemId,

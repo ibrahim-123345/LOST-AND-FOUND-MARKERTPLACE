@@ -6,11 +6,13 @@ const matchSchema = new mongoose.Schema({
   foundItemId: String,
   lostUser: {
     username: String,
-    email: String
+    email: String,
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
   },
   foundUser: {
     username: String,
-    email: String
+    email: String,
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
   },
   matchScore: Number,
   status: String,
