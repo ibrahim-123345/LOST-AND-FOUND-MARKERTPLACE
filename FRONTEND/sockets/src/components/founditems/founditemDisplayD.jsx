@@ -64,9 +64,9 @@ const fetchUserChats = async (userId,itemId) => {
 
         if (!roomExists) {
           try {
-            await axiosInstance.post(`/room/${roomId}`, {
-              user1: match.lostUser,
-              user2: match.foundUser,
+            await axiosInstance.post(`/start`, {
+              userId1: match.lostUser,
+              userId2: match.foundUser,
               matchId: match._id,
             });
           } catch (err) {
@@ -254,7 +254,7 @@ Swal.fire({
   icon: 'info',
   title: 'Hang Tight!',
   text: 'Your item hasn’t been recovered yet. Please be patient as our algorithm works for you.',
-  confirmButtonText: 'Okay',
+  confirmButtonText: ' Okay',
   confirmButtonColor: '#3085d6',
 });
                 

@@ -56,25 +56,26 @@ const startChat = async (req, res) => {
       await Dbconnection()
 
   const { userId1, userId2 } = req.body;
+  console.log(req.body);
 
   try {
     // Check if chat already exists
     let room = await ChatRoom.findOne({
       $or: [
-        { user1: userId1, user2: userId2 },
-        { user1: userId2, user2: userId1 },
+        { user1: userId1.userId, user2: userId2.userId },
+        { user1: userId2.userId, user2: userId1.userId },
       ],
     })
       .populate('user1', 'name avatar')
       .populate('user2', 'name avatar');
 
     if (!room) {
-      const roomId = `${[userId1, userId2].sort().join('_')}`;
+      const roomId = `${[userId1.userId, userId2.userId].sort().join('_')}`;
       
       room = new ChatRoom({
         roomId,
-        user1: userId1,
-        user2: userId2,
+        user1: userId1.userId,
+        user2: userId2.userId,
       });
 
       await room.save();
