@@ -58,7 +58,7 @@ const App = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginRedirect />} />
         <Route path="/register" element={<Register/>} />
-        <Route path="/chat" element={<ChatApp/>} />
+        <Route path="/chat/:id" element={<ChatApp/>} />
 
         {/* Protected Routes */}
         <Route path="/lost-itemsPost" element={<ProtectedRoute element={<LostItemUpload />} allowedRoles={['User', 'Admin']} />} />

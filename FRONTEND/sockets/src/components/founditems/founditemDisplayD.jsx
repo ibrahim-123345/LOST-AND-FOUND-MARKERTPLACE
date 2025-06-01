@@ -13,11 +13,138 @@ const FoundItemDetails = () => {
   const [item, setItem] = useState(null);
   const { isDarkMode } = useThemeStore();
 
+  const [currentUser, setCurrentUser] = useState({});
+
+
+
+
+const fetchCurrentUser =  () => {
+  try {
+    const userId = localStorage.getItem('userid');
+    const role = localStorage.getItem('role');
+    const name = localStorage.getItem('username');
+    
+    if (!userId || !role || !name) {
+      throw new Error('User data not found in localStorage');
+    }
+    
+    return {
+      _id: userId,
+      name: name,
+      role: role
+    };
+  } catch (error) {
+    console.error('Error fetching current user:', error);
+    throw error;
+  }
+};
+
+
+
+
+const fetchUserChats = async (userId,itemId) => {
+  try {
+    const { data: matches } = await axiosInstance.get('/matches');
+
+    const chats = await Promise.all(matches.map(async (match) => {
+      const roomId = `${match.lostUser.userId}_${match.foundUser.userId}`;
+      const isMatchUser = [match.lostUser.userId, match.foundUser.userId].includes(userId);
+      const foundItemId=match.foundItemId || match.lostItemId;
+      
+      // Only continue if user is patch is related to the current itemrt of the match
+      if (match.matchScore >= 0.6 && isMatchUser && foundItemId === itemId) {
+        let roomExists = false;
+
+        try {
+          const { data } = await axiosInstance.get(`/room/${roomId}`);
+          roomExists = !!data[0];
+        } catch (_) {}
+
+        if (!roomExists) {
+          try {
+            await axiosInstance.post(`/room/${roomId}`, {
+              user1: match.lostUser,
+              user2: match.foundUser,
+              matchId: match._id,
+            });
+          } catch (err) {
+            console.error('Room creation failed:', err);
+            return null;
+          }
+        }
+
+        // Redirect only if room exists or was just created and user is involved
+        window.location.href = `/chat/${roomId}`;
+        return null;
+      }
+
+      // Skip if not part of the match
+      if (!isMatchUser) return null;
+
+      // If not redirected, return match chat info
+      let lastMessage = '';
+      let lastMessageAt = null;
+      let unreadCount = 0;
+
+      try {
+        const { data } = await axiosInstance.get(`/room/${roomId}`);
+        const room = data[0];
+        if (room) {
+          lastMessage = room.lastMessage || '';
+          lastMessageAt = room.lastMessageAt ? new Date(room.lastMessageAt) : null;
+          unreadCount = room.unreadCount || 0;
+        }
+      } catch (_) {}
+
+      return {
+        _id: `chat_${match._id}`,
+        roomId,
+        user1: match.lostUser,
+        user2: match.foundUser,
+        lastMessage,
+        lastMessageAt,
+        unreadCount,
+        matchData: {
+          score: match.matchScore,
+          status: match.status,
+          explanation: match.explanation
+        }
+      };
+    }));
+
+    return chats
+      .filter(Boolean)
+      .map(chat => ({
+        ...chat,
+        participant: chat.user1.userId === userId ? chat.user2 : chat.user1,
+        isUnread: chat.unreadCount > 0
+      }));
+
+  } catch (error) {
+    console.error('Error fetching chats:', error);
+    throw error;
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
   useEffect(() => {
     const fetchItem = async () => {
       try {
         const response = await axiosInstance.get(`foundone/${id}`);
         setItem(response.data);
+        const user=fetchCurrentUser()
+        setCurrentUser(user);
+        
       } catch (error) {
         console.error("Error fetching item details:", error);
       }
@@ -117,8 +244,12 @@ const FoundItemDetails = () => {
               <Button
                 variant={isDarkMode ? "outline-light" : "outline-primary"}
                 className="d-flex align-items-center"
-                as={Link}
-                to="/"
+                onClick={async () => {
+                  
+                  await fetchUserChats(currentUser._id, item._id);
+                  //alert("your item was not yet recovered, plz wait while our algorithm play tricks for you")
+                
+                }}
               >
                 <IoMdChatboxes className="me-2" />
                 Chat
