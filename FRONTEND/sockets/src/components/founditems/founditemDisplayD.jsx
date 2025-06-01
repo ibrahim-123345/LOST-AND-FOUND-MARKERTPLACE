@@ -7,6 +7,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import moment from "moment";
 import useThemeStore from "../store/colorStore";
 import axiosInstance from "../../axiosInstance";
+import Swal from 'sweetalert2';
+
 
 const FoundItemDetails = () => {
   const { id } = useParams();
@@ -247,7 +249,14 @@ const fetchUserChats = async (userId,itemId) => {
                 onClick={async () => {
                   
                   await fetchUserChats(currentUser._id, item._id);
-                  //alert("your item was not yet recovered, plz wait while our algorithm play tricks for you")
+
+Swal.fire({
+  icon: 'info',
+  title: 'Hang Tight!',
+  text: 'Your item hasn’t been recovered yet. Please be patient as our algorithm works for you.',
+  confirmButtonText: 'Okay',
+  confirmButtonColor: '#3085d6',
+});
                 
                 }}
               >
