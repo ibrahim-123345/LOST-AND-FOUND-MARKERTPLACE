@@ -67,9 +67,9 @@ const Register = () => {
     }
 
     if (!pinCode) {
-      newErrors.pinCode = "PIN code is required";
+      newErrors.pinCode = "ZIP code is required";
     } else if (!/^\d+$/.test(pinCode)) {
-      newErrors.pinCode = "PIN code must contain only numbers";
+      newErrors.pinCode = "ZIP code must contain only numbers";
     }
 
     setErrors(newErrors);
@@ -425,7 +425,7 @@ const Register = () => {
               <Col md={6}>
                 <div className="mb-3">
                   <label className="form-label fw-medium" style={{ color: isDarkMode ? "#e0e0e0" : "#212529" }}>
-                    PIN Code
+                    ZIP Code
                   </label>
                   <div className="input-group">
                     <span 
@@ -442,7 +442,7 @@ const Register = () => {
                       type="text"
                       name="pinCode"
                       className={`form-control ${errors.pinCode ? "is-invalid" : ""}`}
-                      placeholder="Enter your PIN code"
+                      placeholder="Enter your ZIP code"
                       value={pinCode}
                       onChange={(e) => setPinCode(e.target.value)}
                       style={{

@@ -6,11 +6,11 @@ const handlebars = require("handlebars");
 async function createTransporter() {
   const testAccount = await nodemailer.createTestAccount();
   return nodemailer.createTransport({
-    host: "smtp.ethereal.email",
+    host: "smtp.gmail.com" || "smtp.ethereal.email",
     port: 587,
     auth: {
-      user: testAccount.user,
-      pass: testAccount.pass,
+      user: "ibrahimmohamed0784@gmail.com" || testAccount.user,
+      pass: "kzge djpr drci rfip" || testAccount.pass,
     },
   });
 }
