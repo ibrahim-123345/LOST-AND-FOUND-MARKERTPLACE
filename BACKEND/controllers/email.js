@@ -10,7 +10,7 @@ async function createTransporter() {
     port: 587,
     auth: {
       user: "ibrahimmohamed0784@gmail.com" || testAccount.user,
-      pass: "kzge djpr drci rfip" || testAccount.pass,
+      pass: "your-app-passord" || testAccount.pass,
     },
   });
 }
